@@ -26,9 +26,10 @@ Available balance strategies are:
 | RANDOM | Random based selection |
 | LEAST_CON | The one with the least amount of connections |
 
-```yaml
+```ini
 # The first timeout value is read timeout
 # and the second one is write timeout
+# Both are in seconds
 general:
     server 0.0.0.0 80
     backlog 100
