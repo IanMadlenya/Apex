@@ -7,16 +7,18 @@ Apex is mainly build to act as a load balancer and to route traffic to the desir
 
 - built on top of [netty](https://github.com/netty/netty)
 - high performance
-- load balancer (round robin, random, least connection)
-- health check (ping probe, interval configurable)
-- configurable worker threads
+- load balancing
+- multiple strategies (round robin, random, least connections)
+- health check (ping probe, interval configurable in ms)
+- offline/online server management (removing and adding back to the LB)
+- configurable threads (recommended value is cpu cores * 2)
 - simple but powerful
 
 # Apex config
 
 Very simple but neat config format based on my project [Cope](https://jackwhite20.github.io/Cope/).
 
-Available balance strategies are ROUND_ROBIN, RANDOM and LEAST_CON.
+Available balance strategies are:
 
 | Strategy  | Description |
 | --------- | ----------- |
@@ -33,6 +35,7 @@ general:
     threads 4
     timeout 300 300
     balance ROUND_ROBIN
+    probe 5000
 
 # Here are all your backend servers
 backend:
