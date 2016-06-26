@@ -1,0 +1,10 @@
+general:
+    server 0.0.0.0 80
+    backlog 100
+    threads 4
+    timeout 30 30
+    balance RANDOM
+
+backend:
+    web-01 172.16.0.10 80
+    web-02 172.16.0.11 80
