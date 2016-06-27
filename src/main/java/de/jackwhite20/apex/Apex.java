@@ -19,6 +19,7 @@
 
 package de.jackwhite20.apex;
 
+import ch.qos.logback.classic.Level;
 import de.jackwhite20.apex.pipeline.initialize.ApexChannelInitializer;
 import de.jackwhite20.apex.rest.RestServer;
 import de.jackwhite20.apex.strategy.AbstractBalancingStrategy;
@@ -49,6 +50,8 @@ import java.util.stream.Collectors;
  * Created by JackWhite20 on 26.06.2016.
  */
 public class Apex {
+
+    private static final String APEX_PACKAGE_NAME = "de.jackwhite20.apex";
 
     private static Logger logger = LoggerFactory.getLogger(Main.class);
 
@@ -87,6 +90,11 @@ public class Apex {
         Key timeoutKey = generalHeader.getKey("timeout");
         Key backlogKey = generalHeader.getKey("backlog");
         Key probeKey = generalHeader.getKey("probe");
+        Key debugKey = generalHeader.getKey("debug");
+
+        // Set the log level to debug or info based on the config value
+        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(APEX_PACKAGE_NAME);
+        root.setLevel((Boolean.valueOf(debugKey.getValue(0).asString())) ? Level.DEBUG : Level.INFO);
 
         logger.debug("Server: {}", serverKey.getValue(0).asString() + ":" + serverKey.getValue(1).asInt());
         logger.debug("Balance: {}", balanceKey.getValue(0).asString());

@@ -16,7 +16,7 @@ and are directly accessible and usable.
 - health check (ping probe, interval configurable in ms)
 - offline/online server management (removing and adding back to the LB)
 - configurable threads (recommended value is cpu cores * 2)
-- logging
+- logging (debug logging configurable)
 - simple but powerful
 
 # Apex config
@@ -36,6 +36,7 @@ Available balance strategies are:
 # and the second one is write timeout
 # Both are in seconds
 general:
+    debug true
     server 0.0.0.0 80
     backlog 100
     threads 4
