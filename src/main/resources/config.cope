@@ -4,6 +4,10 @@ general:
     threads 4
     timeout 30 30
     balance RANDOM
+    probe 5000
+
+rest:
+    server localhost 6000
 
 backend:
     web-01 172.16.0.10 80

@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Scanner;
 
 /**
  * Created by JackWhite20 on 26.06.2016.
@@ -60,12 +61,24 @@ public class Main {
                     .def(new Header("general"), new Key("threads"), new Value(String.valueOf(Runtime.getRuntime().availableProcessors() * 2)))
                     .def(new Header("general"), new Key("balance"), new Value("RANDOM"))
                     .def(new Header("general"), new Key("timeout"), new Value("60"), new Value("60"))
+                    .def(new Header("general"), new Key("probe"), new Value("10000"))
                     .build();
 
             logger.info("Config loaded");
 
             Apex apex = new Apex(copeConfig);
             apex.start();
+
+            // TODO: 27.06.2016
+            Scanner scanner = new Scanner(System.in);
+            String line;
+            while ((line = scanner.nextLine()) != null) {
+                if (line.equalsIgnoreCase("end")) {
+                    break;
+                }
+            }
+
+            apex.stop();
         } catch (CopeException e) {
             logger.error("Unable to load config", e);
         }

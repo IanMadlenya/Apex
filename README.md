@@ -3,15 +3,20 @@ Apex is a TCP reverse proxy server with load balancing capabilities.
 
 Apex is mainly build to act as a load balancer and to route traffic to the desired backend server with the capability to select between multiple balancing algorithms. Through the simplicity of the config file you can set it up really quick and it just works.
 
+A cool feature is that you can add or remove backend server through a very simple RESTful API and that these servers are automatically removed or added live to the load balancer
+and are directly accessible and usable.
+
 # Features
 
 - built on top of [netty](https://github.com/netty/netty)
 - high performance
 - load balancing
 - multiple strategies (round robin, random, least connections)
+- dynamic server adding/removing (simple RESTful API)
 - health check (ping probe, interval configurable in ms)
 - offline/online server management (removing and adding back to the LB)
 - configurable threads (recommended value is cpu cores * 2)
+- logging
 - simple but powerful
 
 # Apex config
@@ -37,6 +42,12 @@ general:
     timeout 300 300
     balance ROUND_ROBIN
     probe 5000
+
+# How the RESTful API should be accessible
+# It is recommended to not bind this to 0.0.0.0
+# or to a specific external interface
+rest:
+    server localhost 6000
 
 # Here are all your backend servers
 backend:
