@@ -58,6 +58,15 @@ backend:
     api-04 172.16.0.13 8080
 ```
 
+# Apex RESTful API
+
+The API consists of two simple GET paths with path variables.
+
+| Path  | Example | Description |
+| --------- | ----------- | ----------- |
+| /apex/add/{name}/{ip}/{port} | /apex/add/web-01/172.16.0.50/80 | Adds the given backend server to the load balancer |
+| /apex/remove/{name} | /apex/remove/web-01 | Removes the given backend server from the load balancer |
+
 ### License
 
 Licensed under the GNU General Public License, Version 3.0.
