@@ -40,7 +40,7 @@ general:
     server 0.0.0.0 80
     backlog 100
     threads 4
-    timeout 300 300
+    timeout 30 30
     balance ROUND_ROBIN
     probe 5000
 

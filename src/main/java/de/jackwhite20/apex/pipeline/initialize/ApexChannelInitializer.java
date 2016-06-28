@@ -64,11 +64,11 @@ public class ApexChannelInitializer extends ChannelInitializer<SocketChannel> {
             logger.error("Unable to select a backend server. All down?");
             return;
         }
-
         channel.pipeline()
-                .addLast(new UpstreamHandler(balancingStrategy, backendInfo))
                 .addLast(new ReadTimeoutHandler(readTimeout))
-                .addLast(new WriteTimeoutHandler(writeTimeout));
+                .addLast(new WriteTimeoutHandler(writeTimeout))
+                .addLast(new UpstreamHandler(balancingStrategy, backendInfo));
+
 
         logger.debug("Connected [{}] <-> [{}:{} ({})]", channel.remoteAddress(), backendInfo.getHost(), backendInfo.getPort(), backendInfo.getName());
     }
