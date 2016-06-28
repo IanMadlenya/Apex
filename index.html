@@ -36,6 +36,9 @@
 
 <p>Apex is mainly build to act as a load balancer and to route traffic to the desired backend server with the capability to select between multiple balancing algorithms. Through the simplicity of the config file you can set it up really quick and it just works.</p>
 
+<p>A cool feature is that you can add or remove backend server through a very simple RESTful API and that these servers are automatically removed or added live to the load balancer
+and are directly accessible and usable.</p>
+
 <h1>
 <a id="features" class="anchor" href="#features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features</h1>
 
@@ -45,9 +48,11 @@
 <li>high performance</li>
 <li>load balancing</li>
 <li>multiple strategies (round robin, random, least connections)</li>
+<li>dynamic server adding/removing (simple RESTful API)</li>
 <li>health check (ping probe, interval configurable in ms)</li>
 <li>offline/online server management (removing and adding back to the LB)</li>
 <li>configurable threads (recommended value is cpu cores * 2)</li>
+<li>logging (debug logging configurable)</li>
 <li>simple but powerful</li>
 </ul>
 
@@ -85,6 +90,7 @@
 <span class="pl-c"># and the second one is write timeout</span>
 <span class="pl-c"># Both are in seconds</span>
 general:
+    debug true
     server 0.0.0.0 80
     backlog 100
     threads 4
@@ -92,12 +98,45 @@ general:
     balance ROUND_ROBIN
     probe 5000
 
+<span class="pl-c"># How the RESTful API should be accessible</span>
+<span class="pl-c"># It is recommended to not bind this to 0.0.0.0</span>
+<span class="pl-c"># or to a specific external interface</span>
+rest:
+    server localhost 6000
+
 <span class="pl-c"># Here are all your backend servers</span>
 backend:
     api-01 172.16.0.10 8080
     api-02 172.16.0.11 8080
     api-03 172.16.0.12 8080
     api-04 172.16.0.13 8080</pre></div>
+
+<h1>
+<a id="apex-restful-api" class="anchor" href="#apex-restful-api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Apex RESTful API</h1>
+
+<p>The API consists of two simple GET paths with path variables.</p>
+
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Example</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/apex/add/{name}/{ip}/{port}</td>
+<td>/apex/add/web-01/172.16.0.50/80</td>
+<td>Adds the given backend server to the load balancer</td>
+</tr>
+<tr>
+<td>/apex/remove/{name}</td>
+<td>/apex/remove/web-01</td>
+<td>Removes the given backend server from the load balancer</td>
+</tr>
+</tbody>
+</table>
 
 <h3>
 <a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h3>
