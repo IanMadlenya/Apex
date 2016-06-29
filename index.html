@@ -47,7 +47,7 @@ and are directly accessible and usable.</p>
 </li>
 <li>high performance</li>
 <li>load balancing</li>
-<li>multiple strategies (round robin, random, least connections)</li>
+<li>multiple strategies (round robin, random, least connections, fastest)</li>
 <li>dynamic server adding/removing (simple RESTful API)</li>
 <li>health check (ping probe, interval configurable in ms)</li>
 <li>offline/online server management (removing and adding back to the LB)</li>
@@ -83,6 +83,10 @@ and are directly accessible and usable.</p>
 <td>LEAST_CON</td>
 <td>The one with the least amount of connections</td>
 </tr>
+<tr>
+<td>FASTEST</td>
+<td>The one with the fastest connection time</td>
+</tr>
 </tbody>
 </table>
 
@@ -94,7 +98,7 @@ general:
     server 0.0.0.0 80
     backlog 100
     threads 4
-    timeout 300 300
+    timeout 30 30
     balance ROUND_ROBIN
     probe 5000
 
