@@ -57,15 +57,17 @@ public class UpstreamHandler extends ChannelHandlerAdapter {
                 .channel(ctx.channel().getClass())
                 .handler(new DownstreamHandler(inboundChannel))
                 .option(ChannelOption.TCP_NODELAY, true)
-                // TODO: 25.06.2016 Configurable?
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 2000)
+                // No initial connection should take longer than 4 seconds
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 4000)
                 .option(ChannelOption.AUTO_READ, false);
 
         ChannelFuture f = b.connect(backendInfo.getHost(), backendInfo.getPort());
         downstreamChannel = f.channel();
         f.addListener(new ChannelFutureListener() {
+
             @Override
             public void operationComplete(ChannelFuture future) {
+
                 if (future.isSuccess()) {
                     inboundChannel.read();
                 } else {
@@ -80,8 +82,10 @@ public class UpstreamHandler extends ChannelHandlerAdapter {
 
         if (downstreamChannel.isActive()) {
             downstreamChannel.writeAndFlush(msg).addListener(new ChannelFutureListener() {
+
                 @Override
                 public void operationComplete(ChannelFuture future) {
+
                     if (future.isSuccess()) {
                         ctx.channel().read();
                     } else {

@@ -11,7 +11,7 @@ and are directly accessible and usable.
 - built on top of [netty](https://github.com/netty/netty)
 - high performance
 - load balancing
-- multiple strategies (round robin, random, least connections)
+- multiple strategies (round robin, random, least connections, fastest)
 - dynamic server adding/removing (simple RESTful API)
 - health check (ping probe, interval configurable in ms)
 - offline/online server management (removing and adding back to the LB)
@@ -30,6 +30,7 @@ Available balance strategies are:
 | ROUND_ROBIN | Typical round robin algorithm |
 | RANDOM | Random based selection |
 | LEAST_CON | The one with the least amount of connections |
+| FASTEST | The one with the fastest connection time |
 
 ```ini
 # The first timeout value is read timeout

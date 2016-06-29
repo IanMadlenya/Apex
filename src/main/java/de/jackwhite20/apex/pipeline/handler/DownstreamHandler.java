@@ -45,8 +45,10 @@ public class DownstreamHandler extends ChannelHandlerAdapter {
 
         if (inboundChannel.isActive()) {
             inboundChannel.writeAndFlush(msg).addListener(new ChannelFutureListener() {
+
                 @Override
                 public void operationComplete(ChannelFuture future) {
+
                     if (future.isSuccess()) {
                         ctx.channel().read();
                     } else {

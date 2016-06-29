@@ -23,9 +23,7 @@ import ch.qos.logback.classic.Level;
 import de.jackwhite20.apex.pipeline.initialize.ApexChannelInitializer;
 import de.jackwhite20.apex.rest.RestServer;
 import de.jackwhite20.apex.strategy.AbstractBalancingStrategy;
-import de.jackwhite20.apex.strategy.impl.LeastConnectionStrategy;
-import de.jackwhite20.apex.strategy.impl.RandomBalancingStrategy;
-import de.jackwhite20.apex.strategy.impl.RoundRobinBalancingStrategy;
+import de.jackwhite20.apex.strategy.impl.*;
 import de.jackwhite20.apex.task.CheckBackendTask;
 import de.jackwhite20.apex.util.BackendInfo;
 import de.jackwhite20.cope.CopeConfig;
@@ -126,7 +124,10 @@ public class Apex {
                 balancingStrategy = new RoundRobinBalancingStrategy(backendInfo);
                 break;
             case LEAST_CON:
-                balancingStrategy = new LeastConnectionStrategy(backendInfo);
+                balancingStrategy = new LeastConnectionBalancingStrategy(backendInfo);
+                break;
+            case FASTEST:
+                balancingStrategy = new FastestBalancingStrategy(backendInfo);
                 break;
         }
 

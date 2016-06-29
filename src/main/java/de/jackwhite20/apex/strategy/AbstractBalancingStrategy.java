@@ -64,6 +64,7 @@ public abstract class AbstractBalancingStrategy {
 
         RANDOM,
         ROUND_ROBIN,
-        LEAST_CON
+        LEAST_CON,
+        FASTEST
     }
 }

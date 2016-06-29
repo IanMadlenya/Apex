@@ -29,11 +29,11 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by JackWhite20 on 26.06.2016.
  */
-public class LeastConnectionStrategy extends AbstractBalancingStrategy {
+public class LeastConnectionBalancingStrategy extends AbstractBalancingStrategy {
 
     private Map<BackendInfo, Integer> connections = new ConcurrentHashMap<>();
 
-    public LeastConnectionStrategy(List<BackendInfo> backend) {
+    public LeastConnectionBalancingStrategy(List<BackendInfo> backend) {
 
         super(backend);
 
