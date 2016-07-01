@@ -23,6 +23,7 @@ import ch.qos.logback.classic.Level;
 import de.jackwhite20.apex.pipeline.initialize.ApexChannelInitializer;
 import de.jackwhite20.apex.rest.RestServer;
 import de.jackwhite20.apex.strategy.AbstractBalancingStrategy;
+import de.jackwhite20.apex.strategy.StrategyType;
 import de.jackwhite20.apex.strategy.impl.*;
 import de.jackwhite20.apex.task.CheckBackendTask;
 import de.jackwhite20.apex.util.BackendInfo;
@@ -106,10 +107,10 @@ public class Apex {
                 .map(backend -> new BackendInfo(backend.getName(), backend.getValue(0).asString(), backend.getValue(1).asInt()))
                 .collect(Collectors.toList());
 
-        AbstractBalancingStrategy.Type type = AbstractBalancingStrategy.Type.valueOf(balanceKey.getValue(0).asString());
+        StrategyType type = StrategyType.valueOf(balanceKey.getValue(0).asString());
 
         if (type == null) {
-            type = AbstractBalancingStrategy.Type.RANDOM;
+            type = StrategyType.RANDOM;
 
             logger.info("Using default strategy: {}", type);
         } else {
@@ -167,6 +168,8 @@ public class Apex {
         restServer.stop();
 
         scheduledExecutorService.shutdown();
+
+        logger.info("Apex stopped");
     }
 
     public static AbstractBalancingStrategy getBalancingStrategy() {

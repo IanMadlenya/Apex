@@ -38,10 +38,10 @@ public class FastestBalancingStrategy extends AbstractBalancingStrategy {
     public synchronized BackendInfo selectBackend(String originHost, int originPort) {
 
         BackendInfo current = null;
-        double ping = Integer.MAX_VALUE;
+        double connectTime = Integer.MAX_VALUE;
         for (BackendInfo info : getBackend()) {
-            if (info.getPing() < ping) {
-                ping = info.getPing();
+            if (info.getConnectTime() < connectTime) {
+                connectTime = info.getConnectTime();
                 current = info;
             }
         }

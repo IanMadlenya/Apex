@@ -59,6 +59,7 @@ public class ApexResource {
 
             logger.info("Added backend {}:{} to the load balancer", ip, port);
 
+            // TODO: 30.06.2016 Nicer JSON response
             return Response.ok().content("success").build();
         } else {
             return Response.ok().content("already exists").build();
@@ -85,6 +86,7 @@ public class ApexResource {
 
             logger.info("Removed backend {} from the load balancer", name);
 
+            // TODO: 30.06.2016 Nicer JSON response
             return Response.ok().content("success").build();
         } else {
             return Response.status(Status.NOT_FOUND).content("not found").build();

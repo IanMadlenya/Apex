@@ -68,7 +68,7 @@ public class DownstreamHandler extends ChannelHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
 
-        cause.printStackTrace();
         ChannelUtil.closeOnFlush(ctx.channel());
+        cause.printStackTrace();
     }
 }

@@ -51,7 +51,6 @@ public class UpstreamHandler extends ChannelHandlerAdapter {
 
         final Channel inboundChannel = ctx.channel();
 
-        // Start the connection attempt.
         Bootstrap b = new Bootstrap()
                 .group(inboundChannel.eventLoop())
                 .channel(ctx.channel().getClass())
@@ -109,7 +108,7 @@ public class UpstreamHandler extends ChannelHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
 
-        cause.printStackTrace();
         ChannelUtil.closeOnFlush(ctx.channel());
+        cause.printStackTrace();
     }
 }

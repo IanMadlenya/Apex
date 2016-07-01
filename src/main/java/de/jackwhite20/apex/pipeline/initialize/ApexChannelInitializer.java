@@ -58,17 +58,17 @@ public class ApexChannelInitializer extends ChannelInitializer<SocketChannel> {
         BackendInfo backendInfo = balancingStrategy.selectBackend(channel.remoteAddress().getHostName(), channel.remoteAddress().getPort());
 
         if (backendInfo == null) {
-            // Gracefully close channel
+            // Gracefully close the channel
             channel.close();
 
             logger.error("Unable to select a backend server. All down?");
             return;
         }
+
         channel.pipeline()
                 .addLast(new ReadTimeoutHandler(readTimeout))
                 .addLast(new WriteTimeoutHandler(writeTimeout))
                 .addLast(new UpstreamHandler(balancingStrategy, backendInfo));
-
 
         logger.debug("Connected [{}] <-> [{}:{} ({})]", channel.remoteAddress(), backendInfo.getHost(), backendInfo.getPort(), backendInfo.getName());
     }

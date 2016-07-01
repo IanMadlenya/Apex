@@ -19,6 +19,9 @@
 
 package de.jackwhite20.apex.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -28,13 +31,15 @@ import java.net.Socket;
  */
 public class BackendInfo {
 
+    private static Logger logger = LoggerFactory.getLogger(BackendInfo.class);
+
     private String name;
 
     private String host;
 
     private int port;
 
-    private double ping;
+    private double connectTime;
 
     public BackendInfo(String name, String host, int port) {
 
@@ -58,9 +63,9 @@ public class BackendInfo {
         return port;
     }
 
-    public double getPing() {
+    public double getConnectTime() {
 
-        return ping;
+        return connectTime;
     }
 
     public boolean check() {
@@ -69,18 +74,20 @@ public class BackendInfo {
         try {
             long now = System.currentTimeMillis();
             socket.connect(new InetSocketAddress(host, port), 4000);
-            ping = System.currentTimeMillis() - now;
+            connectTime = System.currentTimeMillis() - now;
 
             return true;
         } catch (IOException e) {
-            return false;
+            logger.error(e.getMessage(), e);
         } finally {
             try {
                 socket.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
             }
         }
+
+        return false;
     }
 
     @Override
@@ -118,7 +125,7 @@ public class BackendInfo {
                 "name='" + name + '\'' +
                 ", host='" + host + '\'' +
                 ", port=" + port +
-                ", ping=" + ping +
+                ", connectTime=" + connectTime +
                 '}';
     }
 }

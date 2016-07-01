@@ -59,12 +59,4 @@ public abstract class AbstractBalancingStrategy {
 
         return backend;
     }
-
-    public enum Type {
-
-        RANDOM,
-        ROUND_ROBIN,
-        LEAST_CON,
-        FASTEST
-    }
 }
