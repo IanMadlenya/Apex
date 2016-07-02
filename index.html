@@ -142,6 +142,30 @@ backend:
 </tbody>
 </table>
 
+<p><em>Responses:</em></p>
+
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Success</th>
+<th>Error</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/apex/add/{name}/{ip}/{port}</td>
+<td><code>{"status":"OK","message":"Successfully added server"}</code></td>
+<td><code>{"status":"SERVER_ALREADY_ADDED","message":"Server was already added"}</code></td>
+</tr>
+<tr>
+<td>/apex/remove/{name}</td>
+<td><code>{"status":"OK","message":"Successfully removed server"}</code></td>
+<td><code>{"status":"SERVER_NOT_FOUND","message":"Server not found"}</code></td>
+</tr>
+</tbody>
+</table>
+
 <h3>
 <a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h3>
 
