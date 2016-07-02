@@ -19,13 +19,16 @@
 
 package de.jackwhite20.apex.rest.resource;
 
+import com.google.gson.Gson;
 import de.jackwhite20.apex.Apex;
+import de.jackwhite20.apex.rest.response.ApexResponse;
 import de.jackwhite20.apex.util.BackendInfo;
 import de.jackwhite20.cobra.server.http.Request;
 import de.jackwhite20.cobra.server.http.annotation.Path;
 import de.jackwhite20.cobra.server.http.annotation.PathParam;
+import de.jackwhite20.cobra.server.http.annotation.Produces;
 import de.jackwhite20.cobra.server.http.annotation.method.GET;
-import de.jackwhite20.cobra.shared.Status;
+import de.jackwhite20.cobra.shared.ContentType;
 import de.jackwhite20.cobra.shared.http.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +41,11 @@ public class ApexResource {
 
     private static Logger logger = LoggerFactory.getLogger(ApexResource.class);
 
+    private Gson gson = new Gson();
+
     @GET
     @Path("/add/{name}/{ip}/{port}")
+    @Produces(ContentType.APPLICATION_JSON)
     public Response add(Request httpRequest, @PathParam String name, @PathParam String ip, @PathParam String port) {
 
         BackendInfo found = null;
@@ -57,17 +63,17 @@ public class ApexResource {
             Apex.getBalancingStrategy().addBackend(backend);
             Apex.getBackendTask().addBackend(backend);
 
-            logger.info("Added backend {}:{} to the load balancer", ip, port);
+            logger.info("Added backend server {}:{} to the load balancer", ip, port);
 
-            // TODO: 30.06.2016 Nicer JSON response
-            return Response.ok().content("success").build();
+            return Response.ok().content(gson.toJson(new ApexResponse(ApexResponse.Status.OK, "Successfully added server"))).build();
         } else {
-            return Response.ok().content("already exists").build();
+            return Response.ok().content(gson.toJson(new ApexResponse(ApexResponse.Status.SERVER_ALREADY_ADDED, "Server was already added"))).build();
         }
     }
 
     @GET
     @Path("/remove/{name}")
+    @Produces(ContentType.APPLICATION_JSON)
     public Response remove(Request httpRequest, @PathParam String name) {
 
         BackendInfo found = null;
@@ -84,12 +90,11 @@ public class ApexResource {
             Apex.getBalancingStrategy().removeBackend(found);
             Apex.getBackendTask().removeBackend(found);
 
-            logger.info("Removed backend {} from the load balancer", name);
+            logger.info("Removed backend server {} from the load balancer", name);
 
-            // TODO: 30.06.2016 Nicer JSON response
-            return Response.ok().content("success").build();
+            return Response.ok().content(gson.toJson(new ApexResponse(ApexResponse.Status.OK, "Successfully removed server"))).build();
         } else {
-            return Response.status(Status.NOT_FOUND).content("not found").build();
+            return Response.ok().content(gson.toJson(new ApexResponse(ApexResponse.Status.SERVER_NOT_FOUND, "Server not found"))).build();
         }
     }
 }
