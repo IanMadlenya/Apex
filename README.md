@@ -63,10 +63,17 @@ backend:
 
 The API consists of two simple GET paths with path variables.
 
-| Path  | Example | Description |
+| Path | Example | Description |
 | --------- | ----------- | ----------- |
 | /apex/add/{name}/{ip}/{port} | /apex/add/web-01/172.16.0.50/80 | Adds the given backend server to the load balancer |
 | /apex/remove/{name} | /apex/remove/web-01 | Removes the given backend server from the load balancer |
+
+_Responses:_
+
+| Path | Success | Error |
+| --------- | ----------- | ----------- |
+| /apex/add/{name}/{ip}/{port} | ```{"status":"OK","message":"Successfully added server"}``` | ```{"status":"SERVER_ALREADY_ADDED","message":"Server was already added"}``` |
+| /apex/remove/{name} | ```{"status":"OK","message":"Successfully removed server"}``` | ```{"status":"SERVER_NOT_FOUND","message":"Server not found"}``` |
 
 ### License
 
