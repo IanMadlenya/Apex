@@ -44,6 +44,14 @@ public class ApexChannelInitializer extends ChannelInitializer<SocketChannel> {
 
     public ApexChannelInitializer(AbstractBalancingStrategy balancingStrategy, int readTimeout, int writeTimeout) {
 
+        if (readTimeout < 0) {
+            throw new IllegalArgumentException("readTimeout cannot be negative");
+        }
+
+        if (writeTimeout < 0) {
+            throw new IllegalArgumentException("writeTimeout cannot be negative");
+        }
+
         this.balancingStrategy = balancingStrategy;
         this.readTimeout = readTimeout;
         this.writeTimeout = writeTimeout;

@@ -24,11 +24,11 @@
     </appender>
 
     <logger name="de.jackwhite20.apex" level="DEBUG" additivity="false">
-        <appender-ref ref="STDOUT" />
-        <appender-ref ref="FILE" />
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
     </logger>
 
     <root level="ERROR">
-        <appender-ref ref="STDOUT" />
+        <appender-ref ref="STDOUT"/>
     </root>
 </configuration>
