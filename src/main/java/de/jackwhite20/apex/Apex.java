@@ -22,12 +22,9 @@ package de.jackwhite20.apex;
 import ch.qos.logback.classic.Level;
 import de.jackwhite20.apex.pipeline.initialize.ApexChannelInitializer;
 import de.jackwhite20.apex.rest.RestServer;
-import de.jackwhite20.apex.strategy.AbstractBalancingStrategy;
+import de.jackwhite20.apex.strategy.BalancingStrategy;
+import de.jackwhite20.apex.strategy.BalancingStrategyFactory;
 import de.jackwhite20.apex.strategy.StrategyType;
-import de.jackwhite20.apex.strategy.impl.FastestBalancingStrategy;
-import de.jackwhite20.apex.strategy.impl.LeastConnectionBalancingStrategy;
-import de.jackwhite20.apex.strategy.impl.RandomBalancingStrategy;
-import de.jackwhite20.apex.strategy.impl.RoundRobinBalancingStrategy;
 import de.jackwhite20.apex.task.CheckBackendTask;
 import de.jackwhite20.apex.util.BackendInfo;
 import de.jackwhite20.cope.CopeConfig;
@@ -61,7 +58,7 @@ public class Apex {
 
     private CopeConfig copeConfig;
 
-    private AbstractBalancingStrategy balancingStrategy;
+    private BalancingStrategy balancingStrategy;
 
     private CheckBackendTask backendTask;
 
@@ -112,28 +109,7 @@ public class Apex {
 
         StrategyType type = StrategyType.valueOf(balanceKey.getValue(0).asString());
 
-        if (type == null) {
-            type = StrategyType.RANDOM;
-
-            logger.info("Using default strategy: {}", type);
-        } else {
-            logger.info("Using strategy: {}", type);
-        }
-
-        switch (type) {
-            case RANDOM:
-                balancingStrategy = new RandomBalancingStrategy(backendInfo);
-                break;
-            case ROUND_ROBIN:
-                balancingStrategy = new RoundRobinBalancingStrategy(backendInfo);
-                break;
-            case LEAST_CON:
-                balancingStrategy = new LeastConnectionBalancingStrategy(backendInfo);
-                break;
-            case FASTEST:
-                balancingStrategy = new FastestBalancingStrategy(backendInfo);
-                break;
-        }
+        balancingStrategy = BalancingStrategyFactory.create(type, backendInfo);
 
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup(threadsKey.getValue(0).asInt());
@@ -175,7 +151,7 @@ public class Apex {
         logger.info("Apex stopped");
     }
 
-    public static AbstractBalancingStrategy getBalancingStrategy() {
+    public static BalancingStrategy getBalancingStrategy() {
 
         return instance.balancingStrategy;
     }

@@ -19,7 +19,7 @@
 
 package de.jackwhite20.apex.strategy.impl;
 
-import de.jackwhite20.apex.strategy.AbstractBalancingStrategy;
+import de.jackwhite20.apex.strategy.BalancingStrategy;
 import de.jackwhite20.apex.util.BackendInfo;
 
 import java.util.List;
@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by JackWhite20 on 26.06.2016.
  */
-public class RoundRobinBalancingStrategy extends AbstractBalancingStrategy {
+public class RoundRobinBalancingStrategy extends BalancingStrategy {
 
     private AtomicInteger currentTarget = new AtomicInteger(0);
 

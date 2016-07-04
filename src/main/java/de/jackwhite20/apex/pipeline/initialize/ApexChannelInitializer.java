@@ -20,7 +20,7 @@
 package de.jackwhite20.apex.pipeline.initialize;
 
 import de.jackwhite20.apex.pipeline.handler.UpstreamHandler;
-import de.jackwhite20.apex.strategy.AbstractBalancingStrategy;
+import de.jackwhite20.apex.strategy.BalancingStrategy;
 import de.jackwhite20.apex.util.BackendInfo;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
@@ -36,13 +36,13 @@ public class ApexChannelInitializer extends ChannelInitializer<SocketChannel> {
 
     private Logger logger = LoggerFactory.getLogger(ApexChannelInitializer.class);
 
-    private AbstractBalancingStrategy balancingStrategy;
+    private BalancingStrategy balancingStrategy;
 
     private int readTimeout;
 
     private int writeTimeout;
 
-    public ApexChannelInitializer(AbstractBalancingStrategy balancingStrategy, int readTimeout, int writeTimeout) {
+    public ApexChannelInitializer(BalancingStrategy balancingStrategy, int readTimeout, int writeTimeout) {
 
         if (readTimeout < 0) {
             throw new IllegalArgumentException("readTimeout cannot be negative");

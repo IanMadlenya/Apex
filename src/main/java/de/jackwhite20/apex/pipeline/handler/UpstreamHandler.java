@@ -19,7 +19,7 @@
 
 package de.jackwhite20.apex.pipeline.handler;
 
-import de.jackwhite20.apex.strategy.AbstractBalancingStrategy;
+import de.jackwhite20.apex.strategy.BalancingStrategy;
 import de.jackwhite20.apex.util.BackendInfo;
 import de.jackwhite20.apex.util.ChannelUtil;
 import io.netty.bootstrap.Bootstrap;
@@ -34,13 +34,13 @@ public class UpstreamHandler extends ChannelHandlerAdapter {
 
     private static Logger logger = LoggerFactory.getLogger(UpstreamHandler.class);
 
-    private AbstractBalancingStrategy balancingStrategy;
+    private BalancingStrategy balancingStrategy;
 
     private BackendInfo backendInfo;
 
     private volatile Channel downstreamChannel;
 
-    public UpstreamHandler(AbstractBalancingStrategy balancingStrategy, BackendInfo backendInfo) {
+    public UpstreamHandler(BalancingStrategy balancingStrategy, BackendInfo backendInfo) {
 
         this.balancingStrategy = balancingStrategy;
         this.backendInfo = backendInfo;

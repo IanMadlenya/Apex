@@ -19,7 +19,7 @@
 
 package de.jackwhite20.apex.strategy.impl;
 
-import de.jackwhite20.apex.strategy.AbstractBalancingStrategy;
+import de.jackwhite20.apex.strategy.BalancingStrategy;
 import de.jackwhite20.apex.util.BackendInfo;
 
 import java.util.List;
@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Created by JackWhite20 on 28.06.2016.
  */
-public class FastestBalancingStrategy extends AbstractBalancingStrategy {
+public class FastestBalancingStrategy extends BalancingStrategy {
 
     public FastestBalancingStrategy(List<BackendInfo> backend) {
 

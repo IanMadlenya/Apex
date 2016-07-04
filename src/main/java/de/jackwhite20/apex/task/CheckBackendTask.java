@@ -20,7 +20,7 @@
 package de.jackwhite20.apex.task;
 
 import de.jackwhite20.apex.Apex;
-import de.jackwhite20.apex.strategy.AbstractBalancingStrategy;
+import de.jackwhite20.apex.strategy.BalancingStrategy;
 import de.jackwhite20.apex.util.BackendInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +38,9 @@ public class CheckBackendTask implements Runnable {
 
     private final List<BackendInfo> backendInfo;
 
-    private AbstractBalancingStrategy balancingStrategy;
+    private BalancingStrategy balancingStrategy;
 
-    public CheckBackendTask(AbstractBalancingStrategy balancingStrategy) {
+    public CheckBackendTask(BalancingStrategy balancingStrategy) {
 
         this.balancingStrategy = balancingStrategy;
         this.backendInfo = Collections.synchronizedList(new ArrayList<>(balancingStrategy.getBackend()));

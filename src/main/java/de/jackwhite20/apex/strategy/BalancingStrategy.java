@@ -27,11 +27,11 @@ import java.util.List;
 /**
  * Created by JackWhite20 on 26.06.2016.
  */
-public abstract class AbstractBalancingStrategy {
+public abstract class BalancingStrategy {
 
     protected List<BackendInfo> backend;
 
-    public AbstractBalancingStrategy(List<BackendInfo> backend) {
+    public BalancingStrategy(List<BackendInfo> backend) {
 
         this.backend = Collections.synchronizedList(backend);
     }
