@@ -126,7 +126,15 @@ public class Apex {
                     .sync()
                     .channel();
 
-            scheduledExecutorService.scheduleAtFixedRate(backendTask = new CheckBackendTask(balancingStrategy), 0, probeKey.getValue(0).asInt(), TimeUnit.MILLISECONDS);
+            int probe = probeKey.getValue(0).asInt();
+            if (probe <= 0) {
+                probe = 10000;
+
+                logger.warn("Probe time value must be > 0");
+                logger.warn("Using default probe time of 10000 milliseconds");
+            }
+
+            scheduledExecutorService.scheduleAtFixedRate(backendTask = new CheckBackendTask(balancingStrategy), 0, probe, TimeUnit.MILLISECONDS);
 
             restServer = new RestServer(copeConfig);
             restServer.start();
