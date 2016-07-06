@@ -40,6 +40,8 @@ public class RoundRobinBalancingStrategy extends BalancingStrategy {
     @Override
     public synchronized BackendInfo selectBackend(String originHost, int originPort) {
 
+        List<BackendInfo> backend = getBackend();
+
         int now = currentTarget.incrementAndGet();
 
         if (now == backend.size()) {

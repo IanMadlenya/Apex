@@ -28,6 +28,10 @@ import io.netty.channel.ChannelFutureListener;
  */
 public final class ChannelUtil {
 
+    private ChannelUtil() {
+        // no instance
+    }
+
     public static void closeOnFlush(Channel ch) {
 
         if (ch != null && ch.isActive()) {

@@ -57,7 +57,7 @@ public class UpstreamHandler extends ChannelHandlerAdapter {
                 .handler(new DownstreamHandler(inboundChannel))
                 .option(ChannelOption.TCP_NODELAY, true)
                 // No initial connection should take longer than 4 seconds
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 4000)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, BackendInfo.DEFAULT_TIMEOUT)
                 .option(ChannelOption.AUTO_READ, false);
 
         ChannelFuture f = b.connect(backendInfo.getHost(), backendInfo.getPort());

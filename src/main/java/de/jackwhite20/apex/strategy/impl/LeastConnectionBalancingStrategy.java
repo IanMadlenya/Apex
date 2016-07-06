@@ -19,19 +19,19 @@
 
 package de.jackwhite20.apex.strategy.impl;
 
+import com.google.common.collect.Maps;
 import de.jackwhite20.apex.strategy.BalancingStrategy;
 import de.jackwhite20.apex.util.BackendInfo;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by JackWhite20 on 26.06.2016.
  */
 public class LeastConnectionBalancingStrategy extends BalancingStrategy {
 
-    private Map<BackendInfo, Integer> connections = new ConcurrentHashMap<>();
+    private Map<BackendInfo, Integer> connections = Maps.newConcurrentMap();
 
     public LeastConnectionBalancingStrategy(List<BackendInfo> backend) {
 

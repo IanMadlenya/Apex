@@ -31,6 +31,8 @@ import java.net.Socket;
  */
 public class BackendInfo {
 
+    public static final int DEFAULT_TIMEOUT = 4000;
+
     private static Logger logger = LoggerFactory.getLogger(BackendInfo.class);
 
     private String name;
@@ -73,7 +75,7 @@ public class BackendInfo {
         Socket socket = new Socket();
         try {
             long now = System.currentTimeMillis();
-            socket.connect(new InetSocketAddress(host, port), 4000);
+            socket.connect(new InetSocketAddress(host, port), DEFAULT_TIMEOUT);
             connectTime = System.currentTimeMillis() - now;
 
             return true;

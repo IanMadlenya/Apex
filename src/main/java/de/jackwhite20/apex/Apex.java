@@ -74,7 +74,7 @@ public class Apex {
 
     public Apex(CopeConfig copeConfig) {
 
-        instance = this;
+        Apex.instance = this;
 
         this.copeConfig = copeConfig;
         this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();

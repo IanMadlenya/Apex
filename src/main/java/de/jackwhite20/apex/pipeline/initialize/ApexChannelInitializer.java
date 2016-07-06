@@ -19,6 +19,7 @@
 
 package de.jackwhite20.apex.pipeline.initialize;
 
+import com.google.common.base.Preconditions;
 import de.jackwhite20.apex.pipeline.handler.UpstreamHandler;
 import de.jackwhite20.apex.strategy.BalancingStrategy;
 import de.jackwhite20.apex.util.BackendInfo;
@@ -44,13 +45,8 @@ public class ApexChannelInitializer extends ChannelInitializer<SocketChannel> {
 
     public ApexChannelInitializer(BalancingStrategy balancingStrategy, int readTimeout, int writeTimeout) {
 
-        if (readTimeout < 0) {
-            throw new IllegalArgumentException("readTimeout cannot be negative");
-        }
-
-        if (writeTimeout < 0) {
-            throw new IllegalArgumentException("writeTimeout cannot be negative");
-        }
+        Preconditions.checkState(readTimeout > 0, "readTimeout cannot be negative");
+        Preconditions.checkState(writeTimeout > 0, "writeTimeout cannot be negative");
 
         this.balancingStrategy = balancingStrategy;
         this.readTimeout = readTimeout;

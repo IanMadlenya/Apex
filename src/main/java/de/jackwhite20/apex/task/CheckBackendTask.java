@@ -19,14 +19,13 @@
 
 package de.jackwhite20.apex.task;
 
+import com.google.common.collect.Lists;
 import de.jackwhite20.apex.Apex;
 import de.jackwhite20.apex.strategy.BalancingStrategy;
 import de.jackwhite20.apex.util.BackendInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -43,7 +42,7 @@ public class CheckBackendTask implements Runnable {
     public CheckBackendTask(BalancingStrategy balancingStrategy) {
 
         this.balancingStrategy = balancingStrategy;
-        this.backendInfo = Collections.synchronizedList(new ArrayList<>(balancingStrategy.getBackend()));
+        this.backendInfo = Lists.newArrayList(balancingStrategy.getBackend());
     }
 
     public synchronized void addBackend(BackendInfo backendInfo) {
@@ -63,6 +62,7 @@ public class CheckBackendTask implements Runnable {
             return;
         }
 
+        // TODO: 06.07.2016
         synchronized (balancingStrategy.getBackend()) {
             synchronized (backendInfo) {
                 for (BackendInfo info : backendInfo) {
