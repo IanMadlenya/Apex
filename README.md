@@ -23,7 +23,7 @@ and are directly accessible and usable.
 
 First of all make sure you have Java 8 installed.
 
-Download the latest Apex version from the release page and start it like this:
+Download the latest Apex version from the [release page](https://github.com/JackWhite20/Apex/releases) and start it like this:
 
 ```
 java -jar apex-1.0.0.jar
