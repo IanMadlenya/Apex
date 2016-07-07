@@ -49,7 +49,7 @@ public class Main {
             try {
                 Files.copy(Main.class.getClassLoader().getResourceAsStream("config.cope"), config.toPath());
             } catch (IOException e) {
-                logger.error("Unable to copy default config", e);
+                logger.error("Unable to copy default config! No write permissions?", e);
                 return;
             }
         }

@@ -19,6 +19,18 @@ and are directly accessible and usable.
 - logging (debug logging configurable)
 - simple but powerful
 
+# Installation
+
+First of all make sure you have Java 8 installed.
+
+Download the latest Apex version from the release page and start it like this:
+
+```
+java -jar apex-1.0.0.jar
+```
+
+Stop it by typing ```end``` followed by an enter press. Configure the config.cope file in the same directory to fit your needs and restart Apex.
+
 # Apex config
 
 Very simple but neat config format based on my project [Cope](https://jackwhite20.github.io/Cope/).
