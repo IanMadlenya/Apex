@@ -27,6 +27,7 @@ import de.jackwhite20.apex.strategy.BalancingStrategyFactory;
 import de.jackwhite20.apex.strategy.StrategyType;
 import de.jackwhite20.apex.task.CheckBackendTask;
 import de.jackwhite20.apex.util.BackendInfo;
+import de.jackwhite20.apex.util.PipelineUtils;
 import de.jackwhite20.cope.CopeConfig;
 import de.jackwhite20.cope.config.Header;
 import de.jackwhite20.cope.config.Key;
@@ -34,8 +35,6 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.ResourceLeakDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +68,7 @@ public class Apex {
 
     private EventLoopGroup bossGroup;
 
-    private NioEventLoopGroup workerGroup;
+    private EventLoopGroup workerGroup;
 
     private RestServer restServer;
 
@@ -115,13 +114,20 @@ public class Apex {
         // Disable the resource leak detector
         ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
 
-        bossGroup = new NioEventLoopGroup();
-        workerGroup = new NioEventLoopGroup(threadsKey.getValue(0).asInt());
+        if (PipelineUtils.isEpoll()) {
+            logger.info("Using high performance epoll event notification mechanism");
+        } else {
+            logger.info("Using normal select/poll event notification mechanism");
+        }
+
+        // Choose the type of the event loop group
+        bossGroup = PipelineUtils.newEventLoopGroup(1);
+        workerGroup = PipelineUtils.newEventLoopGroup(threadsKey.getValue(0).asInt());
 
         try {
             ServerBootstrap b = new ServerBootstrap();
             serverChannel = b.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
+                    .channel(PipelineUtils.getServerChannel())
                     .childHandler(new ApexChannelInitializer(balancingStrategy, timeoutKey.getValue(0).asInt(), timeoutKey.getValue(1).asInt()))
                     .childOption(ChannelOption.AUTO_READ, false)
                     .option(ChannelOption.TCP_NODELAY, true)
@@ -156,7 +162,11 @@ public class Apex {
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
 
-        restServer.stop();
+        try {
+            restServer.stop();
+        } catch (Exception e) {
+            logger.warn("RESTful API server already stopped");
+        }
 
         scheduledExecutorService.shutdown();
 

@@ -22,6 +22,7 @@ package de.jackwhite20.apex.pipeline.handler;
 import de.jackwhite20.apex.strategy.BalancingStrategy;
 import de.jackwhite20.apex.util.BackendInfo;
 import de.jackwhite20.apex.util.ChannelUtil;
+import de.jackwhite20.apex.util.PipelineUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import org.slf4j.Logger;
@@ -53,7 +54,7 @@ public class UpstreamHandler extends ChannelHandlerAdapter {
 
         Bootstrap b = new Bootstrap()
                 .group(inboundChannel.eventLoop())
-                .channel(ctx.channel().getClass())
+                .channel(PipelineUtils.getChannel())
                 .handler(new DownstreamHandler(inboundChannel))
                 .option(ChannelOption.TCP_NODELAY, true)
                 // No initial connection should take longer than 4 seconds
