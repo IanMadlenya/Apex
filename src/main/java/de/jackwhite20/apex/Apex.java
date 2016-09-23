@@ -36,6 +36,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.util.ResourceLeakDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,6 +111,9 @@ public class Apex {
         StrategyType type = StrategyType.valueOf(balanceKey.getValue(0).asString());
 
         balancingStrategy = BalancingStrategyFactory.create(type, backendInfo);
+
+        // Disable the resource leak detector
+        ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
 
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup(threadsKey.getValue(0).asInt());
