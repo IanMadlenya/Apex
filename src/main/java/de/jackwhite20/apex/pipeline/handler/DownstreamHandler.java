@@ -22,6 +22,8 @@ package de.jackwhite20.apex.pipeline.handler;
 import de.jackwhite20.apex.util.ChannelUtil;
 import io.netty.channel.*;
 
+import java.io.IOException;
+
 /**
  * Created by JackWhite20 on 26.06.2016.
  */
@@ -69,6 +71,9 @@ public class DownstreamHandler extends ChannelHandlerAdapter {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
 
         ChannelUtil.closeOnFlush(ctx.channel());
-        cause.printStackTrace();
+
+        if (!(cause instanceof IOException)) {
+            cause.printStackTrace();
+        }
     }
 }

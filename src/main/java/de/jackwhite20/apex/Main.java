@@ -76,6 +76,8 @@ public class Main {
             while ((line = scanner.nextLine()) != null) {
                 if (line.equalsIgnoreCase("end")) {
                     break;
+                } else if (line.equalsIgnoreCase("debug")) {
+                    apex.changeDebug();
                 }
             }
 

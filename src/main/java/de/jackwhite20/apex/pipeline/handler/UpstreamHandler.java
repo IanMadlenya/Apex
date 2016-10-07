@@ -28,6 +28,8 @@ import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 /**
  * Created by JackWhite20 on 26.06.2016.
  */
@@ -110,6 +112,9 @@ public class UpstreamHandler extends ChannelHandlerAdapter {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
 
         ChannelUtil.closeOnFlush(ctx.channel());
-        cause.printStackTrace();
+
+        if (!(cause instanceof IOException)) {
+            cause.printStackTrace();
+        }
     }
 }

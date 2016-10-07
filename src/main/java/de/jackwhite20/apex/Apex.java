@@ -155,6 +155,15 @@ public class Apex {
         }
     }
 
+    public void changeDebug() {
+
+        // Set the log level to debug or info based on the config value
+        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(APEX_PACKAGE_NAME);
+        root.setLevel((root.getLevel() == Level.INFO) ? Level.DEBUG : Level.INFO);
+
+        logger.info("Logger level is now {}", root.getLevel());
+    }
+
     public void stop() {
 
         serverChannel.close();
