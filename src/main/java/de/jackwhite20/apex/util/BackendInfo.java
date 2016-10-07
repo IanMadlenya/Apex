@@ -72,22 +72,13 @@ public class BackendInfo {
 
     public boolean check() {
 
-        Socket socket = new Socket();
-        try {
+        try (Socket socket = new Socket()) {
             long now = System.currentTimeMillis();
             socket.connect(new InetSocketAddress(host, port), DEFAULT_TIMEOUT);
             connectTime = System.currentTimeMillis() - now;
 
             return true;
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        } finally {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                logger.error(e.getMessage(), e);
-            }
-        }
+        } catch (IOException ignore) {}
 
         return false;
     }
