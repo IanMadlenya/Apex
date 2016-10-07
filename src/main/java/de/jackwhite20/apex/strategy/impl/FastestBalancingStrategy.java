@@ -53,4 +53,14 @@ public class FastestBalancingStrategy extends BalancingStrategy {
     public void disconnectedFrom(BackendInfo backendInfo) {
 
     }
+
+    @Override
+    public void removeBackendStrategy(BackendInfo backendInfo) {
+
+    }
+
+    @Override
+    public void addBackendStrategy(BackendInfo backendInfo) {
+
+    }
 }

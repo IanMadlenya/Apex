@@ -40,14 +40,22 @@ public abstract class BalancingStrategy {
 
     public abstract void disconnectedFrom(BackendInfo backendInfo);
 
+    public abstract void removeBackendStrategy(BackendInfo backendInfo);
+
+    public abstract void addBackendStrategy(BackendInfo backendInfo);
+
     public synchronized void addBackend(BackendInfo targetData) {
 
         backend.add(targetData);
+
+        addBackendStrategy(targetData);
     }
 
     public synchronized void removeBackend(BackendInfo targetData) {
 
         backend.remove(targetData);
+
+        removeBackendStrategy(targetData);
     }
 
     public boolean hasBackend(BackendInfo backendInfo) {

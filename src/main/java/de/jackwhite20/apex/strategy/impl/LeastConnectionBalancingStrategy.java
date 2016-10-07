@@ -64,4 +64,18 @@ public class LeastConnectionBalancingStrategy extends BalancingStrategy {
 
         connections.put(backendInfo, connections.get(backendInfo) - 1);
     }
+
+    @Override
+    public void removeBackendStrategy(BackendInfo backendInfo) {
+
+        // Remove backend info if the server was removed from load balancing
+        connections.remove(backendInfo);
+    }
+
+    @Override
+    public void addBackendStrategy(BackendInfo backendInfo) {
+
+        // Add backend info back if the server was added to the load balancing again
+        connections.put(backendInfo, 0);
+    }
 }
