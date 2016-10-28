@@ -19,12 +19,15 @@
 
 package de.jackwhite20.apex.pipeline.handler;
 
-import de.jackwhite20.apex.strategy.BalancingStrategy;
+import de.jackwhite20.apex.Apex;
 import de.jackwhite20.apex.util.BackendInfo;
 import de.jackwhite20.apex.util.ChannelUtil;
 import de.jackwhite20.apex.util.PipelineUtils;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,15 +40,12 @@ public class UpstreamHandler extends ChannelHandlerAdapter {
 
     private static Logger logger = LoggerFactory.getLogger(UpstreamHandler.class);
 
-    private BalancingStrategy balancingStrategy;
-
     private BackendInfo backendInfo;
 
-    private volatile Channel downstreamChannel;
+    private Channel downstreamChannel;
 
-    public UpstreamHandler(BalancingStrategy balancingStrategy, BackendInfo backendInfo) {
+    public UpstreamHandler(BackendInfo backendInfo) {
 
-        this.balancingStrategy = balancingStrategy;
         this.backendInfo = backendInfo;
     }
 
@@ -103,9 +103,22 @@ public class UpstreamHandler extends ChannelHandlerAdapter {
 
         ChannelUtil.closeOnFlush(downstreamChannel);
 
-        balancingStrategy.disconnectedFrom(backendInfo);
+        Apex.getBalancingStrategy().disconnectedFrom(backendInfo);
 
         logger.debug("Disconnected [{}] <-> [{}:{} ({})]", ctx.channel().remoteAddress(), backendInfo.getHost(), backendInfo.getPort(), backendInfo.getName());
+    }
+
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+
+        if (evt instanceof IdleStateEvent) {
+            IdleState state = ((IdleStateEvent) evt).state();
+
+            // Try to wake up the channel
+            ctx.writeAndFlush(Unpooled.EMPTY_BUFFER);
+
+            logger.debug("Idle state [{}] <-> {}", ctx.channel().remoteAddress(), state.name());
+        }
     }
 
     @Override

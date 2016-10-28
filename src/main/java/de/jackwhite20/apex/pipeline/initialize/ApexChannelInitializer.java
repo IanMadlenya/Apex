@@ -20,11 +20,12 @@
 package de.jackwhite20.apex.pipeline.initialize;
 
 import com.google.common.base.Preconditions;
+import de.jackwhite20.apex.Apex;
 import de.jackwhite20.apex.pipeline.handler.UpstreamHandler;
-import de.jackwhite20.apex.strategy.BalancingStrategy;
 import de.jackwhite20.apex.util.BackendInfo;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import org.slf4j.Logger;
@@ -37,18 +38,15 @@ public class ApexChannelInitializer extends ChannelInitializer<SocketChannel> {
 
     private Logger logger = LoggerFactory.getLogger(ApexChannelInitializer.class);
 
-    private BalancingStrategy balancingStrategy;
-
     private int readTimeout;
 
     private int writeTimeout;
 
-    public ApexChannelInitializer(BalancingStrategy balancingStrategy, int readTimeout, int writeTimeout) {
+    public ApexChannelInitializer(int readTimeout, int writeTimeout) {
 
         Preconditions.checkState(readTimeout > 0, "readTimeout cannot be negative");
         Preconditions.checkState(writeTimeout > 0, "writeTimeout cannot be negative");
 
-        this.balancingStrategy = balancingStrategy;
         this.readTimeout = readTimeout;
         this.writeTimeout = writeTimeout;
 
@@ -59,7 +57,7 @@ public class ApexChannelInitializer extends ChannelInitializer<SocketChannel> {
     @Override
     protected void initChannel(SocketChannel channel) throws Exception {
 
-        BackendInfo backendInfo = balancingStrategy.selectBackend(channel.remoteAddress().getHostName(), channel.remoteAddress().getPort());
+        BackendInfo backendInfo = Apex.getBalancingStrategy().selectBackend(channel.remoteAddress().getHostName(), channel.remoteAddress().getPort());
 
         if (backendInfo == null) {
             // Gracefully close the channel
@@ -70,9 +68,10 @@ public class ApexChannelInitializer extends ChannelInitializer<SocketChannel> {
         }
 
         channel.pipeline()
+                .addLast(new IdleStateHandler(readTimeout / 2, writeTimeout / 2, (readTimeout + writeTimeout) / 2))
                 .addLast(new ReadTimeoutHandler(readTimeout))
                 .addLast(new WriteTimeoutHandler(writeTimeout))
-                .addLast(new UpstreamHandler(balancingStrategy, backendInfo));
+                .addLast(new UpstreamHandler(backendInfo));
 
         logger.debug("Connected [{}] <-> [{}:{} ({})]", channel.remoteAddress(), backendInfo.getHost(), backendInfo.getPort(), backendInfo.getName());
     }

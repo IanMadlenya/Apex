@@ -128,7 +128,7 @@ public class Apex {
             ServerBootstrap b = new ServerBootstrap();
             serverChannel = b.group(bossGroup, workerGroup)
                     .channel(PipelineUtils.getServerChannel())
-                    .childHandler(new ApexChannelInitializer(balancingStrategy, timeoutKey.getValue(0).asInt(), timeoutKey.getValue(1).asInt()))
+                    .childHandler(new ApexChannelInitializer(timeoutKey.getValue(0).asInt(), timeoutKey.getValue(1).asInt()))
                     .childOption(ChannelOption.AUTO_READ, false)
                     .option(ChannelOption.TCP_NODELAY, true)
                     .option(ChannelOption.SO_BACKLOG, backlogKey.getValue(0).asInt())
