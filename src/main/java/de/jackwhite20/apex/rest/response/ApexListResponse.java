@@ -19,36 +19,21 @@
 
 package de.jackwhite20.apex.rest.response;
 
+import de.jackwhite20.apex.util.BackendInfo;
+
+import java.util.List;
+
 /**
- * Created by JackWhite20 on 02.07.2016.
+ * Created by JackWhite20 on 28.10.2016.
  */
-public class ApexResponse {
+public class ApexListResponse extends ApexResponse {
 
-    private Status status;
+    private List<BackendInfo> backendInfo;
 
-    private String message;
+    public ApexListResponse(Status status, String message, List<BackendInfo> backendInfo) {
 
-    public ApexResponse(Status status, String message) {
+        super(status, message);
 
-        this.status = status;
-        this.message = message;
-    }
-
-    public Status getStatus() {
-
-        return status;
-    }
-
-    public String getMessage() {
-
-        return message;
-    }
-
-    public enum Status {
-
-        OK,
-        SERVER_NOT_FOUND,
-        SERVER_ALREADY_ADDED,
-        ERROR
+        this.backendInfo = backendInfo;
     }
 }

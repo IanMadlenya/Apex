@@ -21,7 +21,9 @@ package de.jackwhite20.apex.rest.resource;
 
 import com.google.gson.Gson;
 import de.jackwhite20.apex.Apex;
+import de.jackwhite20.apex.rest.response.ApexListResponse;
 import de.jackwhite20.apex.rest.response.ApexResponse;
+import de.jackwhite20.apex.strategy.BalancingStrategy;
 import de.jackwhite20.apex.util.BackendInfo;
 import de.jackwhite20.cobra.server.http.Request;
 import de.jackwhite20.cobra.server.http.annotation.Path;
@@ -41,7 +43,7 @@ public class ApexResource {
 
     private static Logger logger = LoggerFactory.getLogger(ApexResource.class);
 
-    private Gson gson = new Gson();
+    private static Gson gson = new Gson();
 
     @GET
     @Path("/add/{name}/{ip}/{port}")
@@ -95,6 +97,19 @@ public class ApexResource {
             return Response.ok().content(gson.toJson(new ApexResponse(ApexResponse.Status.OK, "Successfully removed server"))).build();
         } else {
             return Response.ok().content(gson.toJson(new ApexResponse(ApexResponse.Status.SERVER_NOT_FOUND, "Server not found"))).build();
+        }
+    }
+
+    @GET
+    @Path("/list")
+    @Produces(ContentType.APPLICATION_JSON)
+    public Response list(Request httpRequest) {
+
+        BalancingStrategy balancingStrategy = Apex.getBalancingStrategy();
+        if (balancingStrategy != null) {
+            return Response.ok().content(gson.toJson(new ApexListResponse(ApexResponse.Status.OK, "List received", balancingStrategy.getBackend()))).build();
+        } else {
+            return Response.ok().content(gson.toJson(new ApexListResponse(ApexResponse.Status.ERROR, "Unable to get the balancing strategy", null))).build();
         }
     }
 }

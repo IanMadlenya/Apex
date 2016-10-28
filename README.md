@@ -12,7 +12,7 @@ and are directly accessible and usable.
 - high performance
 - load balancing
 - multiple strategies (round robin, random, least connections, fastest)
-- dynamic server adding/removing (simple RESTful API)
+- dynamic server adding/removing/listing (simple RESTful API)
 - health check (ping probe, interval configurable in ms)
 - offline/online server management (removing and adding back to the LB)
 - configurable threads (recommended value is cpu cores * 2)
@@ -79,6 +79,7 @@ The API consists of two simple GET paths with path variables.
 | --------- | ----------- | ----------- |
 | /apex/add/{name}/{ip}/{port} | /apex/add/web-01/172.16.0.50/80 | Adds the given backend server to the load balancer |
 | /apex/remove/{name} | /apex/remove/web-01 | Removes the given backend server from the load balancer |
+| /apex/list | /apex/list | Lists the current backend servers which are in the load balancer |
 
 _Responses:_
 
@@ -86,6 +87,7 @@ _Responses:_
 | --------- | ----------- | ----------- |
 | /apex/add/{name}/{ip}/{port} | ```{"status":"OK","message":"Successfully added server"}``` | ```{"status":"SERVER_ALREADY_ADDED","message":"Server was already added"}``` |
 | /apex/remove/{name} | ```{"status":"OK","message":"Successfully removed server"}``` | ```{"status":"SERVER_NOT_FOUND","message":"Server not found"}``` |
+| /apex/list | ```{"backendInfo":[{"name":"api-01","host":"172.16.0.10","port":8080,"connectTime":125.0}],"status":"OK","message":"List received"}``` | ```{"status":"ERROR","message":"Unable to get the balancing strategy"}``` |
 
 ### License
 
