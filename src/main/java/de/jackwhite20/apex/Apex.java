@@ -137,14 +137,19 @@ public class Apex {
                     .channel();
 
             int probe = probeKey.getValue(0).asInt();
-            if (probe <= 0) {
+            if (probe < -1 || probe == 0) {
                 probe = 10000;
 
-                logger.warn("Probe time value must be > 0");
-                logger.warn("Using default probe time of 10000 milliseconds");
+                logger.warn("Probe time value must be -1 to turn it off or greater than 0");
+                logger.warn("Using default probe time of 10000 milliseconds (10 seconds)");
             }
 
-            scheduledExecutorService.scheduleAtFixedRate(backendTask = new CheckBackendTask(balancingStrategy), 0, probe, TimeUnit.MILLISECONDS);
+            if (probe != -1) {
+                scheduledExecutorService.scheduleAtFixedRate(backendTask = new CheckBackendTask(balancingStrategy), 0, probe, TimeUnit.MILLISECONDS);
+            } else {
+                // Shutdown unnecessary scheduler
+                scheduledExecutorService.shutdown();
+            }
 
             restServer = new RestServer(copeConfig);
             restServer.start();
