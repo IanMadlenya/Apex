@@ -48,7 +48,7 @@ and are directly accessible and usable.</p>
 <li>high performance</li>
 <li>load balancing</li>
 <li>multiple strategies (round robin, random, least connections, fastest)</li>
-<li>dynamic server adding/removing (simple RESTful API)</li>
+<li>dynamic server adding/removing/listing (simple RESTful API)</li>
 <li>health check (ping probe, interval configurable in ms)</li>
 <li>offline/online server management (removing and adding back to the LB)</li>
 <li>configurable threads (recommended value is cpu cores * 2)</li>
@@ -63,7 +63,7 @@ and are directly accessible and usable.</p>
 
 <p>Download the latest Apex version from the <a href="https://github.com/JackWhite20/Apex/releases">release page</a> and start it like this:</p>
 
-<pre><code>java -jar apex-1.0.0.jar
+<pre><code>java -jar apex-1.3.0.jar
 </code></pre>
 
 <p>Stop it by typing <code>end</code> followed by an enter press. Configure the config.cope file in the same directory to fit your needs and restart Apex.</p>
@@ -151,6 +151,11 @@ backend:
 <td>/apex/remove/web-01</td>
 <td>Removes the given backend server from the load balancer</td>
 </tr>
+<tr>
+<td>/apex/list</td>
+<td>/apex/list</td>
+<td>Lists the current backend servers which are in the load balancer</td>
+</tr>
 </tbody>
 </table>
 
@@ -174,6 +179,11 @@ backend:
 <td>/apex/remove/{name}</td>
 <td><code>{"status":"OK","message":"Successfully removed server"}</code></td>
 <td><code>{"status":"SERVER_NOT_FOUND","message":"Server not found"}</code></td>
+</tr>
+<tr>
+<td>/apex/list</td>
+<td><code>{"backendInfo":[{"name":"api-01","host":"172.16.0.10","port":8080,"connectTime":125.0}],"status":"OK","message":"List received"}</code></td>
+<td><code>{"status":"ERROR","message":"Unable to get the balancing strategy"}</code></td>
 </tr>
 </tbody>
 </table>
