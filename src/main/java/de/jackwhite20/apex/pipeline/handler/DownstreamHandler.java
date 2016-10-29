@@ -21,6 +21,8 @@ package de.jackwhite20.apex.pipeline.handler;
 
 import de.jackwhite20.apex.util.ChannelUtil;
 import io.netty.channel.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -28,6 +30,8 @@ import java.io.IOException;
  * Created by JackWhite20 on 26.06.2016.
  */
 public class DownstreamHandler extends ChannelHandlerAdapter {
+
+    private static Logger logger = LoggerFactory.getLogger(DownstreamHandler.class);
 
     private Channel inboundChannel;
 
@@ -73,7 +77,7 @@ public class DownstreamHandler extends ChannelHandlerAdapter {
         ChannelUtil.closeOnFlush(ctx.channel());
 
         if (!(cause instanceof IOException)) {
-            cause.printStackTrace();
+            logger.error(cause.getMessage(), cause);
         }
     }
 }

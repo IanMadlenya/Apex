@@ -127,7 +127,7 @@ public class UpstreamHandler extends ChannelHandlerAdapter {
         ChannelUtil.closeOnFlush(ctx.channel());
 
         if (!(cause instanceof IOException)) {
-            cause.printStackTrace();
+            logger.error(cause.getMessage(), cause);
         }
     }
 }
