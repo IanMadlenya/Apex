@@ -73,7 +73,7 @@ backend:
 
 # Apex RESTful API
 
-The API consists of two simple GET paths with path variables.
+The API consists of three simple GET paths with path variables.
 
 | Path | Example | Description |
 | --------- | ----------- | ----------- |
