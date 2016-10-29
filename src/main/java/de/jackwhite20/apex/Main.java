@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Scanner;
 
 /**
  * Created by JackWhite20 on 26.06.2016.
@@ -69,19 +68,7 @@ public class Main {
 
             Apex apex = new Apex(copeConfig);
             apex.start();
-
-            // TODO: 27.06.2016
-            Scanner scanner = new Scanner(System.in);
-            String line;
-            while ((line = scanner.nextLine()) != null) {
-                if (line.equalsIgnoreCase("end")) {
-                    break;
-                } else if (line.equalsIgnoreCase("debug")) {
-                    apex.changeDebug();
-                }
-            }
-
-            apex.stop();
+            apex.console();
         } catch (CopeException e) {
             logger.error("Unable to load config", e);
         }

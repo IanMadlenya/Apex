@@ -20,6 +20,11 @@
 package de.jackwhite20.apex;
 
 import ch.qos.logback.classic.Level;
+import de.jackwhite20.apex.command.Command;
+import de.jackwhite20.apex.command.CommandManager;
+import de.jackwhite20.apex.command.impl.DebugCommand;
+import de.jackwhite20.apex.command.impl.EndCommand;
+import de.jackwhite20.apex.command.impl.HelpCommand;
 import de.jackwhite20.apex.pipeline.initialize.ApexChannelInitializer;
 import de.jackwhite20.apex.rest.RestServer;
 import de.jackwhite20.apex.strategy.BalancingStrategy;
@@ -39,10 +44,13 @@ import io.netty.util.ResourceLeakDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -52,7 +60,9 @@ public class Apex {
 
     private static final String APEX_PACKAGE_NAME = "de.jackwhite20.apex";
 
-    private static Logger logger = LoggerFactory.getLogger(Main.class);
+    private static final Pattern ARGS_PATTERN = Pattern.compile(" ");
+
+    private static Logger logger = LoggerFactory.getLogger(Apex.class);
 
     private static Apex instance;
 
@@ -72,15 +82,24 @@ public class Apex {
 
     private RestServer restServer;
 
+    private CommandManager commandManager;
+
+    private Scanner scanner;
+
     public Apex(CopeConfig copeConfig) {
 
         Apex.instance = this;
 
         this.copeConfig = copeConfig;
         this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+        this.commandManager = new CommandManager();
     }
 
     public void start() {
+
+        commandManager.addCommand(new HelpCommand("help", "List of available commands", "h"));
+        commandManager.addCommand(new EndCommand("end", "Stops Apex", "stop", "exit"));
+        commandManager.addCommand(new DebugCommand("debug", "Turns the debug mode on/off", "d"));
 
         Header generalHeader = copeConfig.getHeader("general");
         Key serverKey = generalHeader.getKey("server");
@@ -99,12 +118,17 @@ public class Apex {
         logger.debug("Balance: {}", balanceKey.getValue(0).asString());
         logger.debug("Backlog: {}", backlogKey.getValue(0).asInt());
         logger.debug("Threads: {}", threadsKey.getValue(0).asInt());
-        logger.debug("Backend: {}", String.join(", ", copeConfig.getHeader("backend").getKeys().stream().map(key -> key.getValue(0).asString() + ":" + key.getValue(1).asInt()).collect(Collectors.toList())));
+        logger.debug("Backend: {}", String.join(", ", copeConfig.getHeader("backend").getKeys()
+                .stream()
+                .map(key -> key.getValue(0).asString() + ":" + key.getValue(1).asInt())
+                .collect(Collectors.toList())));
         logger.debug("Probe: {}", probeKey.getValue(0).asInt());
 
         List<BackendInfo> backendInfo = copeConfig.getHeader("backend").getKeys()
                 .stream()
-                .map(backend -> new BackendInfo(backend.getName(), backend.getValue(0).asString(), backend.getValue(1).asInt()))
+                .map(backend -> new BackendInfo(backend.getName(),
+                        backend.getValue(0).asString(),
+                        backend.getValue(1).asInt()))
                 .collect(Collectors.toList());
 
         StrategyType type = StrategyType.valueOf(balanceKey.getValue(0).asString());
@@ -128,7 +152,8 @@ public class Apex {
             ServerBootstrap b = new ServerBootstrap();
             serverChannel = b.group(bossGroup, workerGroup)
                     .channel(PipelineUtils.getServerChannel())
-                    .childHandler(new ApexChannelInitializer(timeoutKey.getValue(0).asInt(), timeoutKey.getValue(1).asInt()))
+                    .childHandler(new ApexChannelInitializer(timeoutKey.getValue(0).asInt(),
+                            timeoutKey.getValue(1).asInt()))
                     .childOption(ChannelOption.AUTO_READ, false)
                     .option(ChannelOption.TCP_NODELAY, true)
                     .option(ChannelOption.SO_BACKLOG, backlogKey.getValue(0).asInt())
@@ -145,7 +170,8 @@ public class Apex {
             }
 
             if (probe != -1) {
-                scheduledExecutorService.scheduleAtFixedRate(backendTask = new CheckBackendTask(balancingStrategy), 0, probe, TimeUnit.MILLISECONDS);
+                backendTask = new CheckBackendTask(balancingStrategy);
+                scheduledExecutorService.scheduleAtFixedRate(backendTask, 0, probe, TimeUnit.MILLISECONDS);
             } else {
                 // Shutdown unnecessary scheduler
                 scheduledExecutorService.shutdown();
@@ -158,6 +184,39 @@ public class Apex {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void console() {
+
+        scanner = new Scanner(System.in);
+
+        try {
+            String line;
+            while ((line = scanner.nextLine()) != null) {
+                if (!line.isEmpty()) {
+                    String[] split = ARGS_PATTERN.split(line);
+
+                    if (split.length == 0) {
+                        continue;
+                    }
+
+                    // Get the command name
+                    String commandName = split[0].toLowerCase();
+
+                    // Try to get the command with the name
+                    Command command = commandManager.findCommand(commandName);
+
+                    if (command != null) {
+                        logger.info("Executing command: {}", line);
+
+                        String[] cmdArgs = Arrays.copyOfRange(split, 1, split.length);
+                        command.execute(cmdArgs);
+                    } else {
+                        logger.info("Command not found!");
+                    }
+                }
+            }
+        } catch (IllegalStateException ignore) {}
     }
 
     public void changeDebug() {
@@ -173,8 +232,13 @@ public class Apex {
 
         logger.info("Apex is going to be stopped");
 
+        // Close the scanner
+        scanner.close();
+
+        // Close the server channel
         serverChannel.close();
 
+        // Shutdown the event loop groups
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
 
@@ -187,6 +251,11 @@ public class Apex {
         scheduledExecutorService.shutdown();
 
         logger.info("Apex has been stopped");
+    }
+
+    public static CommandManager getCommandManager() {
+
+        return instance.commandManager;
     }
 
     public static BalancingStrategy getBalancingStrategy() {
@@ -202,5 +271,10 @@ public class Apex {
     public static Channel getServerChannel() {
 
         return instance.serverChannel;
+    }
+
+    public static Apex getInstance() {
+
+        return instance;
     }
 }

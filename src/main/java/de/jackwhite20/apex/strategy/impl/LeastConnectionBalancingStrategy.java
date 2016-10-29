@@ -62,7 +62,11 @@ public class LeastConnectionBalancingStrategy extends BalancingStrategy {
     @Override
     public void disconnectedFrom(BackendInfo backendInfo) {
 
-        connections.put(backendInfo, connections.get(backendInfo) - 1);
+        // Only update if the backend is still online
+        Integer count = connections.get(backendInfo);
+        if (count != null) {
+            connections.put(backendInfo, count - 1);
+        }
     }
 
     @Override

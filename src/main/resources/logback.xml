@@ -7,7 +7,7 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>apex.log</file>
+        <file>log/apex.log</file>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>%d{HH:mm:ss} [%thread] %-5level %class{0} - %msg%n</Pattern>
         </encoder>
