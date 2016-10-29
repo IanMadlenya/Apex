@@ -171,6 +171,8 @@ public class Apex {
 
     public void stop() {
 
+        logger.info("Apex is going to be stopped");
+
         serverChannel.close();
 
         bossGroup.shutdownGracefully();
@@ -184,7 +186,7 @@ public class Apex {
 
         scheduledExecutorService.shutdown();
 
-        logger.info("Apex stopped");
+        logger.info("Apex has been stopped");
     }
 
     public static BalancingStrategy getBalancingStrategy() {
