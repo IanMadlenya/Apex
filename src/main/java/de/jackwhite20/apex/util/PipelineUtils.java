@@ -36,6 +36,12 @@ import io.netty.util.internal.PlatformDependent;
  */
 public final class PipelineUtils {
 
+    public static final int DEFAULT_THREADS_THRESHOLD = 1;
+
+    public static final int DEFAULT_BOSS_THREADS = 1;
+
+    public static final int DEFAULT_WORKER_THREADS = Runtime.getRuntime().availableProcessors() * 2;
+
     private static boolean epoll;
 
     static {

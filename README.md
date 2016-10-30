@@ -15,7 +15,8 @@ and are directly accessible and usable.
 - dynamic server adding/removing/listing (simple RESTful API)
 - health check (ping probe, interval configurable in ms)
 - offline/online server management (removing and adding back to the LB)
-- configurable threads (recommended value is cpu cores * 2)
+- configurable boss threads (1 should be fine for most normal use cases)
+- configurable worker threads (recommended value is cpu cores * 2)
 - logging (debug logging configurable)
 - simple but powerful
 
@@ -48,11 +49,15 @@ Available balance strategies are:
 # The first timeout value is read timeout
 # and the second one is write timeout
 # Both are in seconds
+#
+# The boss value is the amount of threads to accept connections
+# The worker value is the amount of threads to handle events
 general:
     debug true
     server 0.0.0.0 80
     backlog 100
-    threads 4
+    boss 1
+    worker 4
     timeout 30 30
     balance ROUND_ROBIN
     probe 5000

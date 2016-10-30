@@ -19,6 +19,7 @@
 
 package de.jackwhite20.apex;
 
+import de.jackwhite20.apex.util.PipelineUtils;
 import de.jackwhite20.cope.Cope;
 import de.jackwhite20.cope.CopeConfig;
 import de.jackwhite20.cope.config.Header;
@@ -57,7 +58,8 @@ public class Main {
             CopeConfig copeConfig = Cope.from(config)
                     .def(new Header("general"), new Key("server"), new Value("0.0.0.0"), new Value("80"))
                     .def(new Header("general"), new Key("backlog"), new Value("100"))
-                    .def(new Header("general"), new Key("threads"), new Value(String.valueOf(Runtime.getRuntime().availableProcessors() * 2)))
+                    .def(new Header("general"), new Key("boss"), new Value(String.valueOf(PipelineUtils.DEFAULT_BOSS_THREADS)))
+                    .def(new Header("general"), new Key("worker"), new Value(String.valueOf(PipelineUtils.DEFAULT_WORKER_THREADS)))
                     .def(new Header("general"), new Key("balance"), new Value("RANDOM"))
                     .def(new Header("general"), new Key("timeout"), new Value("60"), new Value("60"))
                     .def(new Header("general"), new Key("probe"), new Value("10000"))

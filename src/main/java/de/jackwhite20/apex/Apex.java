@@ -104,7 +104,8 @@ public class Apex {
         Header generalHeader = copeConfig.getHeader("general");
         Key serverKey = generalHeader.getKey("server");
         Key balanceKey = generalHeader.getKey("balance");
-        Key threadsKey = generalHeader.getKey("threads");
+        Key bossKey = generalHeader.getKey("boss");
+        Key workerKey = generalHeader.getKey("worker");
         Key timeoutKey = generalHeader.getKey("timeout");
         Key backlogKey = generalHeader.getKey("backlog");
         Key probeKey = generalHeader.getKey("probe");
@@ -117,7 +118,8 @@ public class Apex {
         logger.debug("Server: {}", serverKey.getValue(0).asString() + ":" + serverKey.getValue(1).asInt());
         logger.debug("Balance: {}", balanceKey.getValue(0).asString());
         logger.debug("Backlog: {}", backlogKey.getValue(0).asInt());
-        logger.debug("Threads: {}", threadsKey.getValue(0).asInt());
+        logger.debug("Boss: {}", bossKey.getValue(0).asInt());
+        logger.debug("Worker: {}", workerKey.getValue(0).asInt());
         logger.debug("Backend: {}", String.join(", ", copeConfig.getHeader("backend").getKeys()
                 .stream()
                 .map(key -> key.getValue(0).asString() + ":" + key.getValue(1).asInt())
@@ -131,6 +133,7 @@ public class Apex {
                         backend.getValue(1).asInt()))
                 .collect(Collectors.toList());
 
+        // TODO: 30.10.2016 Null check
         StrategyType type = StrategyType.valueOf(balanceKey.getValue(0).asString());
 
         balancingStrategy = BalancingStrategyFactory.create(type, backendInfo);
@@ -145,8 +148,26 @@ public class Apex {
         }
 
         // Choose the type of the event loop group
-        bossGroup = PipelineUtils.newEventLoopGroup(1);
-        workerGroup = PipelineUtils.newEventLoopGroup(threadsKey.getValue(0).asInt());
+        int bossThreads = bossKey.getValue(0).asInt();
+        if (bossThreads < PipelineUtils.DEFAULT_THREADS_THRESHOLD) {
+            bossThreads = PipelineUtils.DEFAULT_BOSS_THREADS;
+
+            logger.warn("Boss threads needs to be greater or equal than {}. Using default value of {}",
+                    PipelineUtils.DEFAULT_THREADS_THRESHOLD,
+                    PipelineUtils.DEFAULT_BOSS_THREADS);
+        }
+
+        int workerThreads = workerKey.getValue(0).asInt();
+        if (workerThreads < PipelineUtils.DEFAULT_THREADS_THRESHOLD) {
+            workerThreads = PipelineUtils.DEFAULT_WORKER_THREADS;
+
+            logger.warn("Worker threads needs to be greater or equal than {}. Using default value of {}",
+                    PipelineUtils.DEFAULT_THREADS_THRESHOLD,
+                    PipelineUtils.DEFAULT_WORKER_THREADS);
+        }
+
+        bossGroup = PipelineUtils.newEventLoopGroup(bossThreads);
+        workerGroup = PipelineUtils.newEventLoopGroup(workerThreads);
 
         try {
             ServerBootstrap b = new ServerBootstrap();

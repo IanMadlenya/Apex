@@ -2,7 +2,8 @@ general:
     debug true
     server 0.0.0.0 80
     backlog 100
-    threads 4
+    boss 1
+    worker 4
     timeout 30 30
     balance RANDOM
     probe 5000
