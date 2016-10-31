@@ -13,13 +13,13 @@
         </encoder>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-            <FileNamePattern>apex.%i.log.zip</FileNamePattern>
+            <FileNamePattern>log/apex.%i.log.zip</FileNamePattern>
             <MinIndex>1</MinIndex>
             <MaxIndex>10</MaxIndex>
         </rollingPolicy>
 
         <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <MaxFileSize>1MB</MaxFileSize>
+            <MaxFileSize>150KB</MaxFileSize>
         </triggeringPolicy>
     </appender>
 

@@ -42,8 +42,6 @@ public final class BalancingStrategyFactory {
 
     public static BalancingStrategy create(StrategyType type, List<BackendInfo> backendInfo) {
 
-        BalancingStrategy balancingStrategy = null;
-
         if (type == null) {
             type = StrategyType.RANDOM;
 
@@ -54,19 +52,15 @@ public final class BalancingStrategyFactory {
 
         switch (type) {
             case RANDOM:
-                balancingStrategy = new RandomBalancingStrategy(backendInfo);
-                break;
+                return new RandomBalancingStrategy(backendInfo);
             case ROUND_ROBIN:
-                balancingStrategy = new RoundRobinBalancingStrategy(backendInfo);
-                break;
+                return new RoundRobinBalancingStrategy(backendInfo);
             case LEAST_CON:
-                balancingStrategy = new LeastConnectionBalancingStrategy(backendInfo);
-                break;
+                return new LeastConnectionBalancingStrategy(backendInfo);
             case FASTEST:
-                balancingStrategy = new FastestBalancingStrategy(backendInfo);
-                break;
+                return new FastestBalancingStrategy(backendInfo);
+            default:
+                throw new IllegalStateException("unknown strategy type '" + type + "'");
         }
-
-        return balancingStrategy;
     }
 }

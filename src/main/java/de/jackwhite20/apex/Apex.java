@@ -68,6 +68,8 @@ public class Apex {
 
     private static Apex instance;
 
+    private static ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(APEX_PACKAGE_NAME);
+
     private CopeConfig copeConfig;
 
     private BalancingStrategy balancingStrategy;
@@ -117,10 +119,8 @@ public class Apex {
         Key debugKey = generalHeader.getKey("debug");
         Key statsKey = generalHeader.getKey("stats");
 
-        // TODO: 31.10.2016 Method
         // Set the log level to debug or info based on the config value
-        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(APEX_PACKAGE_NAME);
-        root.setLevel((Boolean.valueOf(debugKey.getValue(0).asString())) ? Level.DEBUG : Level.INFO);
+        changeDebug((Boolean.valueOf(debugKey.getValue(0).asString())) ? Level.DEBUG : Level.INFO);
 
         List<BackendInfo> backendInfo = copeConfig.getHeader("backend").getKeys()
                 .stream()
@@ -129,7 +129,8 @@ public class Apex {
                         backend.getValue(1).asInt()))
                 .collect(Collectors.toList());
 
-        logger.debug("Server: {}", serverKey.getValue(0).asString() + ":" + serverKey.getValue(1).asInt());
+        logger.debug("Host: {}", serverKey.getValue(0).asString());
+        logger.debug("Port: {}", serverKey.getValue(1).asString());
         logger.debug("Balance: {}", balanceKey.getValue(0).asString());
         logger.debug("Backlog: {}", backlogKey.getValue(0).asInt());
         logger.debug("Boss: {}", bossKey.getValue(0).asInt());
@@ -138,7 +139,6 @@ public class Apex {
         logger.debug("Probe: {}", probeKey.getValue(0).asInt());
         logger.debug("Backend: {}", backendInfo.stream().map(BackendInfo::getHost).collect(Collectors.joining(", ")));
 
-        // TODO: 30.10.2016 Null check
         StrategyType type = StrategyType.valueOf(balanceKey.getValue(0).asString());
 
         balancingStrategy = BalancingStrategyFactory.create(type, backendInfo);
@@ -252,13 +252,17 @@ public class Apex {
         } catch (IllegalStateException ignore) {}
     }
 
-    public void changeDebug() {
+    public void changeDebug(Level level) {
 
         // Set the log level to debug or info based on the config value
-        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(APEX_PACKAGE_NAME);
-        root.setLevel((root.getLevel() == Level.INFO) ? Level.DEBUG : Level.INFO);
+        rootLogger.setLevel(level);
 
-        logger.info("Logger level is now {}", root.getLevel());
+        logger.info("Logger level is now {}", rootLogger.getLevel());
+    }
+
+    public void changeDebug() {
+
+        changeDebug((rootLogger.getLevel() == Level.INFO) ? Level.DEBUG : Level.INFO);
     }
 
     public void stop() {
