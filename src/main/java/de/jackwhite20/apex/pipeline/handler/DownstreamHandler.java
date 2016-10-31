@@ -21,6 +21,7 @@ package de.jackwhite20.apex.pipeline.handler;
 
 import de.jackwhite20.apex.util.ChannelUtil;
 import io.netty.channel.*;
+import io.netty.handler.timeout.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +77,8 @@ public class DownstreamHandler extends ChannelHandlerAdapter {
 
         ChannelUtil.closeOnFlush(ctx.channel());
 
-        if (!(cause instanceof IOException)) {
+        // Ignore IO and timeout related exceptions
+        if (!(cause instanceof IOException) && !(cause instanceof TimeoutException)) {
             logger.error(cause.getMessage(), cause);
         }
     }

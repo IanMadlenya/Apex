@@ -22,12 +22,11 @@ package de.jackwhite20.apex.pipeline.handler;
 import de.jackwhite20.apex.Apex;
 import de.jackwhite20.apex.util.BackendInfo;
 import de.jackwhite20.apex.util.ChannelUtil;
+import de.jackwhite20.apex.util.ConnectionManager;
 import de.jackwhite20.apex.util.PipelineUtils;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
-import io.netty.handler.timeout.IdleState;
-import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.handler.timeout.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +71,10 @@ public class UpstreamHandler extends ChannelHandlerAdapter {
 
                 if (future.isSuccess()) {
                     inboundChannel.read();
+
+                    // Increment connection count only if
+                    // successfully connected to a backend
+                    ConnectionManager.increment();
                 } else {
                     inboundChannel.close();
                 }
@@ -105,20 +108,10 @@ public class UpstreamHandler extends ChannelHandlerAdapter {
 
         Apex.getBalancingStrategy().disconnectedFrom(backendInfo);
 
+        // Decrement connection count
+        ConnectionManager.decrement();
+
         logger.debug("Disconnected [{}] <-> [{}:{} ({})]", ctx.channel().remoteAddress(), backendInfo.getHost(), backendInfo.getPort(), backendInfo.getName());
-    }
-
-    @Override
-    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-
-        if (evt instanceof IdleStateEvent) {
-            IdleState state = ((IdleStateEvent) evt).state();
-
-            // Try to wake up the channel
-            ctx.writeAndFlush(Unpooled.EMPTY_BUFFER);
-
-            logger.debug("Idle state [{}] <-> {}", ctx.channel().remoteAddress(), state.name());
-        }
     }
 
     @Override
@@ -126,7 +119,8 @@ public class UpstreamHandler extends ChannelHandlerAdapter {
 
         ChannelUtil.closeOnFlush(ctx.channel());
 
-        if (!(cause instanceof IOException)) {
+        // Ignore IO and timeout related exceptions
+        if (!(cause instanceof IOException) && !(cause instanceof TimeoutException)) {
             logger.error(cause.getMessage(), cause);
         }
     }

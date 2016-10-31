@@ -25,6 +25,7 @@ import de.jackwhite20.apex.command.CommandManager;
 import de.jackwhite20.apex.command.impl.DebugCommand;
 import de.jackwhite20.apex.command.impl.EndCommand;
 import de.jackwhite20.apex.command.impl.HelpCommand;
+import de.jackwhite20.apex.command.impl.StatsCommand;
 import de.jackwhite20.apex.pipeline.initialize.ApexChannelInitializer;
 import de.jackwhite20.apex.rest.RestServer;
 import de.jackwhite20.apex.strategy.BalancingStrategy;
@@ -40,6 +41,7 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.util.ResourceLeakDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +82,8 @@ public class Apex {
 
     private EventLoopGroup workerGroup;
 
+    private GlobalTrafficShapingHandler trafficShapingHandler;
+
     private RestServer restServer;
 
     private CommandManager commandManager;
@@ -100,6 +104,7 @@ public class Apex {
         commandManager.addCommand(new HelpCommand("help", "List of available commands", "h"));
         commandManager.addCommand(new EndCommand("end", "Stops Apex", "stop", "exit"));
         commandManager.addCommand(new DebugCommand("debug", "Turns the debug mode on/off", "d"));
+        commandManager.addCommand(new StatsCommand("stats", "Shows live stats", "s", "info"));
 
         Header generalHeader = copeConfig.getHeader("general");
         Key serverKey = generalHeader.getKey("server");
@@ -110,21 +115,12 @@ public class Apex {
         Key backlogKey = generalHeader.getKey("backlog");
         Key probeKey = generalHeader.getKey("probe");
         Key debugKey = generalHeader.getKey("debug");
+        Key statsKey = generalHeader.getKey("stats");
 
+        // TODO: 31.10.2016 Method
         // Set the log level to debug or info based on the config value
         ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(APEX_PACKAGE_NAME);
         root.setLevel((Boolean.valueOf(debugKey.getValue(0).asString())) ? Level.DEBUG : Level.INFO);
-
-        logger.debug("Server: {}", serverKey.getValue(0).asString() + ":" + serverKey.getValue(1).asInt());
-        logger.debug("Balance: {}", balanceKey.getValue(0).asString());
-        logger.debug("Backlog: {}", backlogKey.getValue(0).asInt());
-        logger.debug("Boss: {}", bossKey.getValue(0).asInt());
-        logger.debug("Worker: {}", workerKey.getValue(0).asInt());
-        logger.debug("Backend: {}", String.join(", ", copeConfig.getHeader("backend").getKeys()
-                .stream()
-                .map(key -> key.getValue(0).asString() + ":" + key.getValue(1).asInt())
-                .collect(Collectors.toList())));
-        logger.debug("Probe: {}", probeKey.getValue(0).asInt());
 
         List<BackendInfo> backendInfo = copeConfig.getHeader("backend").getKeys()
                 .stream()
@@ -132,6 +128,15 @@ public class Apex {
                         backend.getValue(0).asString(),
                         backend.getValue(1).asInt()))
                 .collect(Collectors.toList());
+
+        logger.debug("Server: {}", serverKey.getValue(0).asString() + ":" + serverKey.getValue(1).asInt());
+        logger.debug("Balance: {}", balanceKey.getValue(0).asString());
+        logger.debug("Backlog: {}", backlogKey.getValue(0).asInt());
+        logger.debug("Boss: {}", bossKey.getValue(0).asInt());
+        logger.debug("Worker: {}", workerKey.getValue(0).asInt());
+        logger.debug("Stats: {}", statsKey.getValue(0).asString());
+        logger.debug("Probe: {}", probeKey.getValue(0).asInt());
+        logger.debug("Backend: {}", backendInfo.stream().map(BackendInfo::getHost).collect(Collectors.joining(", ")));
 
         // TODO: 30.10.2016 Null check
         StrategyType type = StrategyType.valueOf(balanceKey.getValue(0).asString());
@@ -198,6 +203,13 @@ public class Apex {
                 scheduledExecutorService.shutdown();
             }
 
+            if (Boolean.parseBoolean(statsKey.getValue(0).asString())) {
+                // Traffic shaping handler with default check interval of 1000
+                trafficShapingHandler = new GlobalTrafficShapingHandler(workerGroup, 0, 0);
+
+                logger.debug("Traffic stats collect handler initialized");
+            }
+
             restServer = new RestServer(copeConfig);
             restServer.start();
 
@@ -257,7 +269,14 @@ public class Apex {
         scanner.close();
 
         // Close the server channel
-        serverChannel.close();
+        if (serverChannel != null) {
+            serverChannel.close();
+        }
+
+        // Release the traffic shaping handler
+        if (trafficShapingHandler != null) {
+            trafficShapingHandler.release();
+        }
 
         // Shutdown the event loop groups
         bossGroup.shutdownGracefully();
@@ -292,6 +311,11 @@ public class Apex {
     public static Channel getServerChannel() {
 
         return instance.serverChannel;
+    }
+
+    public GlobalTrafficShapingHandler getTrafficShapingHandler() {
+
+        return trafficShapingHandler;
     }
 
     public static Apex getInstance() {

@@ -25,9 +25,9 @@ import de.jackwhite20.apex.pipeline.handler.UpstreamHandler;
 import de.jackwhite20.apex.util.BackendInfo;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
+import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +57,8 @@ public class ApexChannelInitializer extends ChannelInitializer<SocketChannel> {
     @Override
     protected void initChannel(SocketChannel channel) throws Exception {
 
-        BackendInfo backendInfo = Apex.getBalancingStrategy().selectBackend(channel.remoteAddress().getHostName(), channel.remoteAddress().getPort());
+        BackendInfo backendInfo = Apex.getBalancingStrategy()
+                .selectBackend(channel.remoteAddress().getHostName(), channel.remoteAddress().getPort());
 
         if (backendInfo == null) {
             // Gracefully close the channel
@@ -68,10 +69,15 @@ public class ApexChannelInitializer extends ChannelInitializer<SocketChannel> {
         }
 
         channel.pipeline()
-                .addLast(new IdleStateHandler(readTimeout / 2, writeTimeout / 2, (readTimeout + writeTimeout) / 2))
                 .addLast(new ReadTimeoutHandler(readTimeout))
-                .addLast(new WriteTimeoutHandler(writeTimeout))
-                .addLast(new UpstreamHandler(backendInfo));
+                .addLast(new WriteTimeoutHandler(writeTimeout));
+
+        GlobalTrafficShapingHandler trafficShapingHandler = Apex.getInstance().getTrafficShapingHandler();
+        if (trafficShapingHandler != null) {
+            channel.pipeline().addLast(trafficShapingHandler);
+        }
+
+        channel.pipeline().addLast(new UpstreamHandler(backendInfo));
 
         logger.debug("Connected [{}] <-> [{}:{} ({})]", channel.remoteAddress(), backendInfo.getHost(), backendInfo.getPort(), backendInfo.getName());
     }

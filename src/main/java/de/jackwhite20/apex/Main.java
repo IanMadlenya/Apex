@@ -64,6 +64,7 @@ public class Main {
                     .def(new Header("general"), new Key("timeout"), new Value("60"), new Value("60"))
                     .def(new Header("general"), new Key("probe"), new Value("10000"))
                     .def(new Header("general"), new Key("debug"), new Value("true"))
+                    .def(new Header("general"), new Key("stats"), new Value("true"))
                     .build();
 
             logger.info("Config loaded");

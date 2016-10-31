@@ -23,8 +23,10 @@ import com.google.gson.Gson;
 import de.jackwhite20.apex.Apex;
 import de.jackwhite20.apex.rest.response.ApexListResponse;
 import de.jackwhite20.apex.rest.response.ApexResponse;
+import de.jackwhite20.apex.rest.response.ApexStatsResponse;
 import de.jackwhite20.apex.strategy.BalancingStrategy;
 import de.jackwhite20.apex.util.BackendInfo;
+import de.jackwhite20.apex.util.ConnectionManager;
 import de.jackwhite20.cobra.server.http.Request;
 import de.jackwhite20.cobra.server.http.annotation.Path;
 import de.jackwhite20.cobra.server.http.annotation.PathParam;
@@ -32,6 +34,8 @@ import de.jackwhite20.cobra.server.http.annotation.Produces;
 import de.jackwhite20.cobra.server.http.annotation.method.GET;
 import de.jackwhite20.cobra.shared.ContentType;
 import de.jackwhite20.cobra.shared.http.Response;
+import io.netty.handler.traffic.GlobalTrafficShapingHandler;
+import io.netty.handler.traffic.TrafficCounter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,9 +71,11 @@ public class ApexResource {
 
             logger.info("Added backend server {}:{} to the load balancer", ip, port);
 
-            return Response.ok().content(gson.toJson(new ApexResponse(ApexResponse.Status.OK, "Successfully added server"))).build();
+            return Response.ok().content(gson.toJson(new ApexResponse(ApexResponse.Status.OK,
+                    "Successfully added server"))).build();
         } else {
-            return Response.ok().content(gson.toJson(new ApexResponse(ApexResponse.Status.SERVER_ALREADY_ADDED, "Server was already added"))).build();
+            return Response.ok().content(gson.toJson(new ApexResponse(ApexResponse.Status.SERVER_ALREADY_ADDED,
+                    "Server was already added"))).build();
         }
     }
 
@@ -94,9 +100,11 @@ public class ApexResource {
 
             logger.info("Removed backend server {} from the load balancer", name);
 
-            return Response.ok().content(gson.toJson(new ApexResponse(ApexResponse.Status.OK, "Successfully removed server"))).build();
+            return Response.ok().content(gson.toJson(new ApexResponse(ApexResponse.Status.OK,
+                    "Successfully removed server"))).build();
         } else {
-            return Response.ok().content(gson.toJson(new ApexResponse(ApexResponse.Status.SERVER_NOT_FOUND, "Server not found"))).build();
+            return Response.ok().content(gson.toJson(new ApexResponse(ApexResponse.Status.SERVER_NOT_FOUND,
+                    "Server not found"))).build();
         }
     }
 
@@ -107,9 +115,45 @@ public class ApexResource {
 
         BalancingStrategy balancingStrategy = Apex.getBalancingStrategy();
         if (balancingStrategy != null) {
-            return Response.ok().content(gson.toJson(new ApexListResponse(ApexResponse.Status.OK, "List received", balancingStrategy.getBackend()))).build();
+            return Response.ok().content(gson.toJson(new ApexListResponse(ApexResponse.Status.OK, "List received",
+                    balancingStrategy.getBackend()))).build();
         } else {
-            return Response.ok().content(gson.toJson(new ApexListResponse(ApexResponse.Status.ERROR, "Unable to get the balancing strategy", null))).build();
+            return Response.ok().content(gson.toJson(new ApexListResponse(ApexResponse.Status.ERROR,
+                    "Unable to get the balancing strategy",
+                    null))).build();
+        }
+    }
+
+    @GET
+    @Path("/stats")
+    @Produces(ContentType.APPLICATION_JSON)
+    public Response stats(Request httpRequest) {
+
+        GlobalTrafficShapingHandler trafficShapingHandler = Apex.getInstance().getTrafficShapingHandler();
+        if (trafficShapingHandler != null) {
+            TrafficCounter trafficCounter = trafficShapingHandler.trafficCounter();
+
+            return Response.ok().content(gson.toJson(new ApexStatsResponse(ApexResponse.Status.OK,
+                    "OK",
+                    ConnectionManager.getConnections(),
+                    Apex.getBalancingStrategy().getBackend().size(),
+                    trafficCounter.currentReadBytes(),
+                    trafficCounter.currentWrittenBytes(),
+                    trafficCounter.lastReadThroughput(),
+                    trafficCounter.lastWriteThroughput(),
+                    trafficCounter.cumulativeReadBytes(),
+                    trafficCounter.cumulativeWrittenBytes()))).build();
+        } else {
+            return Response.ok().content(gson.toJson(new ApexStatsResponse(ApexResponse.Status.ERROR,
+                    "Stats are disabled",
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1,
+                    -1))).build();
         }
     }
 }
