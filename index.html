@@ -1,40 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-us">
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <meta charset="UTF-8">
+    <title>Apex by JackWhite20</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
-
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-
-    <title>Apex by JackWhite20</title>
   </head>
-
   <body>
-    <header>
-      <div class="inner">
-        <h1>Apex</h1>
-        <h2>Apex is a TCP reverse proxy server with load balancing capabilities.</h2>
-        <a href="https://github.com/JackWhite20/Apex" class="button"><small>View project on</small> GitHub</a>
-      </div>
-    </header>
+    <section class="page-header">
+      <h1 class="project-name">Apex</h1>
+      <h2 class="project-tagline">Apex is a high performance TCP reverse proxy server with load balancing capabilities.</h2>
+      <a href="https://github.com/JackWhite20/Apex" class="btn">View on GitHub</a>
+      <a href="https://github.com/JackWhite20/Apex/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/JackWhite20/Apex/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-    <div id="content-wrapper">
-      <div class="inner clearfix">
-        <section id="main-content">
-          <h1>
+    <section class="main-content">
+      <h1>
 <a id="apex" class="anchor" href="#apex" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Apex</h1>
 
 <p>Apex is mainly build to act as a load balancer and to route traffic to the desired backend server with the capability to select between multiple balancing algorithms. Through the simplicity of the config file you can set it up really quick and it just works.</p>
 
 <p>A cool feature is that you can add or remove backend server through a very simple RESTful API and that these servers are automatically removed or added live to the load balancer
-and are directly accessible and usable.</p>
+and are directly accessible and usable.
+The RESTful API also gives you the opportunity to get live traffic and general stats of Apex.</p>
+
+<h1>
+<a id="overview" class="anchor" href="#overview" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Overview</h1>
+
+<ul>
+<li><a href="https://jackwhite20.github.io/Apex/#features">Features</a></li>
+<li><a href="https://jackwhite20.github.io/Apex/#installation">Installation</a></li>
+<li><a href="https://jackwhite20.github.io/Apex/#config">Config</a></li>
+<li><a href="https://jackwhite20.github.io/Apex/#real-world-stats">Real-World stats</a></li>
+<li><a href="https://jackwhite20.github.io/Apex/#restful-api">RESTful API</a></li>
+</ul>
 
 <h1>
 <a id="features" class="anchor" href="#features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features</h1>
@@ -42,15 +45,16 @@ and are directly accessible and usable.</p>
 <ul>
 <li>built on top of <a href="https://github.com/netty/netty">netty</a>
 </li>
-<li>high performance</li>
 <li>load balancing</li>
 <li>multiple strategies (round robin, random, least connections, fastest)</li>
 <li>dynamic server adding/removing/listing (simple RESTful API)</li>
 <li>health check (ping probe, interval configurable in ms)</li>
 <li>offline/online server management (removing and adding back to the LB)</li>
-<li>configurable threads (recommended value is cpu cores * 2)</li>
+<li>configurable boss threads (1 should be fine for most normal use cases)</li>
+<li>configurable worker threads (recommended value is cpu cores * 2)</li>
 <li>logging (debug logging configurable)</li>
-<li>simple but powerful</li>
+<li>live traffic and other stats</li>
+<li>persistent total read/written stats</li>
 </ul>
 
 <h1>
@@ -60,13 +64,13 @@ and are directly accessible and usable.</p>
 
 <p>Download the latest Apex version from the <a href="https://github.com/JackWhite20/Apex/releases">release page</a> and start it like this:</p>
 
-<pre><code>java -jar apex-1.3.0.jar
+<pre><code>java -jar apex-1.6.0.jar
 </code></pre>
 
 <p>Stop it by typing <code>end</code> followed by an enter press. Configure the config.cope file in the same directory to fit your needs and restart Apex.</p>
 
 <h1>
-<a id="apex-config" class="anchor" href="#apex-config" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Apex config</h1>
+<a id="config" class="anchor" href="#config" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Config</h1>
 
 <p>Very simple but neat config format based on my project <a href="https://jackwhite20.github.io/Cope/">Cope</a>.</p>
 
@@ -102,14 +106,22 @@ and are directly accessible and usable.</p>
 <div class="highlight highlight-source-ini"><pre><span class="pl-c"># The first timeout value is read timeout</span>
 <span class="pl-c"># and the second one is write timeout</span>
 <span class="pl-c"># Both are in seconds</span>
+<span class="pl-c">#</span>
+<span class="pl-c"># The boss value is the amount of threads to accept connections</span>
+<span class="pl-c"># The worker value is the amount of threads to handle events</span>
+<span class="pl-c">#</span>
+<span class="pl-c"># If stats is true Apex will collect traffic stats that are </span>
+<span class="pl-c"># accessible through the RESTful API</span>
 general:
     debug true
     server 0.0.0.0 80
     backlog 100
-    threads 4
+    boss 1
+    worker 4
     timeout 30 30
     balance ROUND_ROBIN
     probe 5000
+    stats true
 
 <span class="pl-c"># How the RESTful API should be accessible</span>
 <span class="pl-c"># It is recommended to not bind this to 0.0.0.0</span>
@@ -125,9 +137,29 @@ backend:
     api-04 172.16.0.13 8080</pre></div>
 
 <h1>
-<a id="apex-restful-api" class="anchor" href="#apex-restful-api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Apex RESTful API</h1>
+<a id="real-world-stats" class="anchor" href="#real-world-stats" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Real-World stats</h1>
 
-<p>The API consists of three simple GET paths with path variables.</p>
+<p>Apex was tested with over 200 connections (players) and a throughput of 150 Mbit/s.
+During the live load Apex only had 40-60% CPU usage with 1 boss thread and 4 worker threads on a 4 core 8 threads Xeon E3 CPU and a maximum RAM usage of 2 GB.
+So Apex has only used 7.5% of the total CPU power which shows that it can be used nicely in a dynamic cloud infrastructure with small virtual machines.
+You can definitely use multiple Apex instances through DNS-RB to fit your bandwidth and availability needs.</p>
+
+<p>All balancing strategies were tested and all performed perfectly. The health check also works as it should, so it removes dead backend servers and adds these back when they are up again.</p>
+
+<p>As you can see Apex is a high performance software load balancer with the focus in performance and efficiency. 
+It has many features to be as flexible and dynamically as possible but also to be simple.</p>
+
+<p>Hardware details tested with:</p>
+
+<p>CPU model name: Intel(R) Xeon(R) CPU E3-1231 v3 @ 3.40GHz<br>
+OS name: Debian GNU/Linux 8 (jessie)<br>
+NIC/Uplink speed: 1 Gbit/s<br>
+RAM: 4 GB</p>
+
+<h1>
+<a id="restful-api" class="anchor" href="#restful-api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>RESTful API</h1>
+
+<p>The API consists of four simple GET paths. Two are with path variables to keep the adding and removing of backend server as simple as possible.</p>
 
 <table>
 <thead>
@@ -152,6 +184,11 @@ backend:
 <td>/apex/list</td>
 <td>/apex/list</td>
 <td>Lists the current backend servers which are in the load balancer</td>
+</tr>
+<tr>
+<td>/apex/stats</td>
+<td>/apex/stats</td>
+<td>Live traffic stats from Apex</td>
 </tr>
 </tbody>
 </table>
@@ -182,6 +219,11 @@ backend:
 <td><code>{"backendInfo":[{"name":"api-01","host":"172.16.0.10","port":8080,"connectTime":125.0}],"status":"OK","message":"List received"}</code></td>
 <td><code>{"status":"ERROR","message":"Unable to get the balancing strategy"}</code></td>
 </tr>
+<tr>
+<td>/apex/stats</td>
+<td><code>{"connections":360,"onlineBackendServers":3,"currentReadBytes":500,"currentWrittenBytes":25356,"lastReadThroughput":36,"lastWriteThroughput":39864,"totalReadBytes":929,"totalWrittenBytes":705887}</code></td>
+<td><code>{"connections":-1,"onlineBackendServers":-1,"currentReadBytes":-1,"currentWriteBytes":-1,"lastReadThroughput":-1,"lastWriteThroughput":-1,"totalReadBytes":-1,"totalWrittenBytes":-1,"status":"ERROR","message":"Stats are disabled"}</code></td>
+</tr>
 </tbody>
 </table>
 
@@ -189,24 +231,14 @@ backend:
 <a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h3>
 
 <p>Licensed under the GNU General Public License, Version 3.0.</p>
-        </section>
 
-        <aside id="sidebar">
-          <a href="https://github.com/JackWhite20/Apex/zipball/master" class="button">
-            <small>Download</small>
-            .zip file
-          </a>
-          <a href="https://github.com/JackWhite20/Apex/tarball/master" class="button">
-            <small>Download</small>
-            .tar.gz file
-          </a>
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/JackWhite20/Apex">Apex</a> is maintained by <a href="https://github.com/JackWhite20">JackWhite20</a>.</span>
 
-          <p class="repo-owner"><a href="https://github.com/JackWhite20/Apex"></a> is maintained by <a href="https://github.com/JackWhite20">JackWhite20</a>.</p>
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
 
-          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
-        </aside>
-      </div>
-    </div>
+    </section>
 
   
   </body>
