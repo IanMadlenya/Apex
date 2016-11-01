@@ -29,7 +29,7 @@ import java.util.List;
  */
 public abstract class BalancingStrategy {
 
-    private List<BackendInfo> backend;
+    protected List<BackendInfo> backend;
 
     public BalancingStrategy(List<BackendInfo> backend) {
 

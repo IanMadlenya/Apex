@@ -40,8 +40,6 @@ public class RandomBalancingStrategy extends BalancingStrategy {
     @Override
     public synchronized BackendInfo selectBackend(String originHost, int originPort) {
 
-        List<BackendInfo> backend = getBackend();
-
         return (!backend.isEmpty()) ? backend.get(random.nextInt(backend.size())) : null;
     }
 
