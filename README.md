@@ -1,5 +1,5 @@
 # Apex
-Apex is a TCP reverse proxy server with load balancing capabilities.
+Apex is a high performance TCP reverse proxy server with load balancing capabilities.
 
 Apex is mainly build to act as a load balancer and to route traffic to the desired backend server with the capability to select between multiple balancing algorithms. Through the simplicity of the config file you can set it up really quick and it just works.
 
@@ -18,7 +18,6 @@ The RESTful API also gives you the opportunity to get live traffic and general s
 # Features
 
 - built on top of [netty](https://github.com/netty/netty)
-- high performance
 - load balancing
 - multiple strategies (round robin, random, least connections, fastest)
 - dynamic server adding/removing/listing (simple RESTful API)
@@ -92,23 +91,26 @@ backend:
 
 # Real-World stats
 
-Apex was tested with over 200 connections (players) and a throughput of 150 MBit.
-During the live load Apex only had 40-60% CPU usage with 1 boss thread and 4 worker threads on a 4 core Xeon E3 CPU and a maximum RAM usage of 2 GB.
-So Apex has only used 7.5% of the total CPU power.
+Apex was tested with over 200 connections (players) and a throughput of 150 Mbit/s.
+During the live load Apex only had 40-60% CPU usage with 1 boss thread and 4 worker threads on a 4 core 8 threads Xeon E3 CPU and a maximum RAM usage of 2 GB.
+So Apex has only used 7.5% of the total CPU power which shows that it can be used nicely in a dynamic cloud infrastructure with small virtual machines.
+You can definitely use multiple Apex instances through DNS-RB to fit your bandwidth and availability needs.
 
 All balancing strategies were tested and all performed perfectly. The health check also works as it should, so it removes dead backend servers and adds these back when they are up again.
 
-As you can see Apex is a high performance software load balancer with the focus in performance and efficiency. It has
-many features to be as flexible and dynamically as possible but also to be simple.
+As you can see Apex is a high performance software load balancer with the focus in performance and efficiency. 
+It has many features to be as flexible and dynamically as possible but also to be simple.
 
-Hardware details:
+Hardware details tested with:
 
-CPU model name: Intel(R) Xeon(R) CPU E3-1231 v3 @ 3.40GHz
-OS name: Debian GNU/Linux 8 (jessie)
+CPU model name: Intel(R) Xeon(R) CPU E3-1231 v3 @ 3.40GHz  
+OS name: Debian GNU/Linux 8 (jessie)  
+NIC/Uplink speed: 1 Gbit/s  
+RAM: 4 GB
 
 # RESTful API
 
-The API consists of three simple GET paths with path variables.
+The API consists of four simple GET paths. Two are with path variables to keep the adding and removing of backend server as simple as possible.
 
 | Path | Example | Description |
 | --------- | ----------- | ----------- |
