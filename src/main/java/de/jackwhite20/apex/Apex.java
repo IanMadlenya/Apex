@@ -33,7 +33,9 @@ import de.jackwhite20.apex.strategy.BalancingStrategyFactory;
 import de.jackwhite20.apex.strategy.StrategyType;
 import de.jackwhite20.apex.task.CheckBackendTask;
 import de.jackwhite20.apex.util.BackendInfo;
+import de.jackwhite20.apex.util.FileUtil;
 import de.jackwhite20.apex.util.PipelineUtils;
+import de.jackwhite20.apex.util.ReflectionUtil;
 import de.jackwhite20.cope.CopeConfig;
 import de.jackwhite20.cope.config.Header;
 import de.jackwhite20.cope.config.Key;
@@ -204,8 +206,18 @@ public class Apex {
             }
 
             if (Boolean.parseBoolean(statsKey.getValue(0).asString())) {
+                // Load the total stats
+                long[] totalBytes = FileUtil.loadStats();
+
+                logger.debug("Loaded total read bytes: {}", totalBytes[0]);
+                logger.debug("Loaded total written bytes: {}", totalBytes[1]);
+
                 // Traffic shaping handler with default check interval of 1000
                 trafficShapingHandler = new GlobalTrafficShapingHandler(workerGroup, 0, 0);
+
+                // Set the total stats
+                ReflectionUtil.setAtomicLong(trafficShapingHandler.trafficCounter(), "cumulativeReadBytes", totalBytes[0]);
+                ReflectionUtil.setAtomicLong(trafficShapingHandler.trafficCounter(), "cumulativeWrittenBytes", totalBytes[1]);
 
                 logger.debug("Traffic stats collect handler initialized");
             }
@@ -262,6 +274,7 @@ public class Apex {
 
     public void changeDebug() {
 
+        // Change the log level based on the current level
         changeDebug((rootLogger.getLevel() == Level.INFO) ? Level.DEBUG : Level.INFO);
     }
 
@@ -276,6 +289,11 @@ public class Apex {
         if (serverChannel != null) {
             serverChannel.close();
         }
+
+        FileUtil.saveStats(trafficShapingHandler.trafficCounter().cumulativeReadBytes(),
+                trafficShapingHandler.trafficCounter().cumulativeWrittenBytes());
+
+        logger.info("Total bytes stats saved");
 
         // Release the traffic shaping handler
         if (trafficShapingHandler != null) {

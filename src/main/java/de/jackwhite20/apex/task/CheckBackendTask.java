@@ -62,7 +62,6 @@ public class CheckBackendTask implements Runnable {
             return;
         }
 
-        // TODO: 06.07.2016
         synchronized (balancingStrategy.getBackend()) {
             synchronized (backendInfo) {
                 for (BackendInfo info : backendInfo) {
@@ -79,7 +78,7 @@ public class CheckBackendTask implements Runnable {
                             if (balancingStrategy.getBackend().size() == 0) {
                                 logger.error("No more backend servers online");
                             } else {
-                                logger.debug("{} backend servers left", balancingStrategy.getBackend().size());
+                                logger.info("{} backend servers left", balancingStrategy.getBackend().size());
                             }
                         }
                     }

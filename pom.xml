@@ -4,7 +4,7 @@
 
     <groupId>de.jackwhite20</groupId>
     <artifactId>apex</artifactId>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>1.6.0-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

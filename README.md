@@ -5,6 +5,15 @@ Apex is mainly build to act as a load balancer and to route traffic to the desir
 
 A cool feature is that you can add or remove backend server through a very simple RESTful API and that these servers are automatically removed or added live to the load balancer
 and are directly accessible and usable.
+The RESTful API also gives you the opportunity to get live traffic and general stats of Apex.
+
+# Overview
+
+- [Features](https://github.com/JackWhite20/Apex#features)
+- [Installation](https://github.com/JackWhite20/Apex#installation)
+- [Config](https://github.com/JackWhite20/Apex#config)
+- [Real-World stats](https://github.com/JackWhite20/Apex#real-world-stats)
+- [RESTful API](https://github.com/JackWhite20/Apex#restful-api)
 
 # Features
 
@@ -18,7 +27,8 @@ and are directly accessible and usable.
 - configurable boss threads (1 should be fine for most normal use cases)
 - configurable worker threads (recommended value is cpu cores * 2)
 - logging (debug logging configurable)
-- simple but powerful
+- live traffic and other stats
+- persistent total read/written stats
 
 # Installation
 
@@ -27,12 +37,12 @@ First of all make sure you have Java 8 installed.
 Download the latest Apex version from the [release page](https://github.com/JackWhite20/Apex/releases) and start it like this:
 
 ```
-java -jar apex-1.3.0.jar
+java -jar apex-1.6.0.jar
 ```
 
 Stop it by typing ```end``` followed by an enter press. Configure the config.cope file in the same directory to fit your needs and restart Apex.
 
-# Apex config
+# Config
 
 Very simple but neat config format based on my project [Cope](https://jackwhite20.github.io/Cope/).
 
@@ -80,7 +90,23 @@ backend:
     api-04 172.16.0.13 8080
 ```
 
-# Apex RESTful API
+# Real-World stats
+
+Apex was tested with over 200 connections (players) and a throughput of 150 MBit.
+During the live load Apex only had 40-60% CPU usage with 1 boss thread and 4 worker threads on a 4 core Xeon E3 CPU and a maximum RAM usage of 2 GB.
+So Apex has only used 7.5% of the total CPU power.
+
+All balancing strategies were tested and all performed perfectly. The health check also works as it should, so it removes dead backend servers and adds these back when they are up again.
+
+As you can see Apex is a high performance software load balancer with the focus in performance and efficiency. It has
+many features to be as flexible and dynamically as possible but also to be simple.
+
+Hardware details:
+
+CPU model name: Intel(R) Xeon(R) CPU E3-1231 v3 @ 3.40GHz
+OS name: Debian GNU/Linux 8 (jessie)
+
+# RESTful API
 
 The API consists of three simple GET paths with path variables.
 
