@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class RoundRobinBalancingStrategy extends BalancingStrategy {
 
-    private AtomicInteger currentTarget = new AtomicInteger(0);
+    private AtomicInteger currentTarget = new AtomicInteger(-1);
 
     public RoundRobinBalancingStrategy(List<BackendInfo> backend) {
 
