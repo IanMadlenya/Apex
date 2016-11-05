@@ -22,11 +22,9 @@ package de.jackwhite20.apex.util;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
-import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.epoll.EpollServerSocketChannel;
-import io.netty.channel.epoll.EpollSocketChannel;
+import io.netty.channel.epoll.*;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.internal.PlatformDependent;
@@ -67,6 +65,11 @@ public final class PipelineUtils {
     public static Class<? extends Channel> getChannel() {
 
         return epoll ? EpollSocketChannel.class : NioSocketChannel.class;
+    }
+
+    public static Class<? extends Channel> getDatagramChannel() {
+
+        return epoll ? EpollDatagramChannel.class : NioDatagramChannel.class;
     }
 
     public static boolean isEpoll() {
