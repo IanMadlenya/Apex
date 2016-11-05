@@ -48,7 +48,6 @@ public class ApexDatagram extends Apex {
 
         logger.info("Bootstrapping datagram server");
 
-        // TODO: 05.11.2016 Traffic shaping handler
         return new Bootstrap()
                 .group(workerGroup)
                 .channel(PipelineUtils.getDatagramChannel())

@@ -19,8 +19,10 @@
 
 package de.jackwhite20.apex.udp.pipeline;
 
+import de.jackwhite20.apex.Apex;
 import de.jackwhite20.apex.udp.ApexDatagram;
 import de.jackwhite20.apex.util.BackendInfo;
+import de.jackwhite20.apex.util.ChannelUtil;
 import de.jackwhite20.apex.util.PipelineUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -29,6 +31,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
+import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,11 +68,22 @@ public class DatagramChannelHandler extends SimpleChannelInboundHandler<Datagram
 
         ChannelFuture channelFuture = bootstrap.bind(0);
 
+        // Add the traffic shaping handler to the channel pipeline
+        GlobalTrafficShapingHandler trafficShapingHandler = Apex.getInstance().getTrafficShapingHandler();
+        if (trafficShapingHandler != null) {
+            // The handler needs to be the first handler in the pipeline
+            channelFuture.channel().pipeline().addFirst(trafficShapingHandler);
+        }
+
         channelFuture.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture channelFuture) throws Exception {
 
-                channelFuture.channel().writeAndFlush(new DatagramPacket(copy.retain(), new InetSocketAddress(backendInfo.getHost(), backendInfo.getPort())));
+                if (channelFuture.isSuccess()) {
+                    channelFuture.channel().writeAndFlush(new DatagramPacket(copy.retain(), new InetSocketAddress(backendInfo.getHost(), backendInfo.getPort())));
+                } else {
+                    ChannelUtil.close(ctx.channel());
+                }
             }
         });
     }
@@ -77,7 +91,7 @@ public class DatagramChannelHandler extends SimpleChannelInboundHandler<Datagram
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 
-        ctx.close();
+        ChannelUtil.close(ctx.channel());
 
         if (!(cause instanceof IOException)) {
             logger.error(cause.getMessage(), cause);

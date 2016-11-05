@@ -19,6 +19,7 @@
 
 package de.jackwhite20.apex.udp.pipeline;
 
+import de.jackwhite20.apex.util.ChannelUtil;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -55,9 +56,15 @@ public class DatagramDownstreamHandler extends SimpleChannelInboundHandler<Datag
     }
 
     @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+
+        ChannelUtil.close(channel);
+    }
+
+    @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 
-        ctx.close();
+        ChannelUtil.close(ctx.channel());
 
         if (!(cause instanceof IOException)) {
             logger.error(cause.getMessage(), cause);

@@ -30,19 +30,23 @@ public class Client {
 
     public static void main(String[] args) throws Exception {
 
-        DatagramChannel datagramChannel = DatagramChannel.open();
-        // Set the Apex instance to the remote endpoint
-        datagramChannel.connect(new InetSocketAddress("localhost", 8080));
+        for (int i = 0; i < 20; i++) {
+            DatagramChannel datagramChannel = DatagramChannel.open();
+            // Set the Apex instance to the remote endpoint
+            datagramChannel.connect(new InetSocketAddress("localhost", 8080));
 
-        String sent = "Test";
+            String sent = "TestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest";
 
-        datagramChannel.write(ByteBuffer.wrap(sent.getBytes()));
+            datagramChannel.write(ByteBuffer.wrap(sent.getBytes()));
 
-        System.out.println("Sent: " + sent);
+            System.out.println("Sent: " + sent);
 
-        ByteBuffer byteBuffer = ByteBuffer.allocate(100);
-        datagramChannel.receive(byteBuffer);
+            ByteBuffer byteBuffer = ByteBuffer.allocate(100);
+            datagramChannel.receive(byteBuffer);
 
-        System.out.println("Received: " + new String(byteBuffer.array()));
+            System.out.println("Received: " + new String(byteBuffer.array()));
+
+            Thread.sleep(500);
+        }
     }
 }

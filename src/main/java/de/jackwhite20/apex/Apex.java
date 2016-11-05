@@ -203,14 +203,14 @@ public abstract class Apex {
                 scheduledExecutorService.shutdown();
             }
 
-            if (Boolean.parseBoolean(statsKey.getValue(0).asString())) {
+            if (statsKey.next().asBoolean()) {
                 // Load the total stats
                 long[] totalBytes = FileUtil.loadStats();
 
                 logger.debug("Loaded total read bytes: {}", totalBytes[0]);
                 logger.debug("Loaded total written bytes: {}", totalBytes[1]);
 
-                // Traffic shaping handler with default check interval of 1000
+                // Traffic shaping handler with default check interval of one second
                 trafficShapingHandler = new GlobalTrafficShapingHandler(workerGroup, 0, 0);
 
                 // Set the total stats
@@ -218,6 +218,10 @@ public abstract class Apex {
                 ReflectionUtil.setAtomicLong(trafficShapingHandler.trafficCounter(), "cumulativeWrittenBytes", totalBytes[1]);
 
                 logger.debug("Traffic stats collect handler initialized");
+
+                // Add the traffic shaping handler to the server channel pipeline
+                // The handler needs to be the first handler in the pipeline
+                serverChannel.pipeline().addFirst(trafficShapingHandler);
             }
 
             restServer = new RestServer(copeConfig);
