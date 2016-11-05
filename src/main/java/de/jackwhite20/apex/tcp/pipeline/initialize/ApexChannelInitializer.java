@@ -17,11 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.jackwhite20.apex.pipeline.initialize;
+package de.jackwhite20.apex.tcp.pipeline.initialize;
 
 import com.google.common.base.Preconditions;
-import de.jackwhite20.apex.Apex;
-import de.jackwhite20.apex.pipeline.handler.UpstreamHandler;
+import de.jackwhite20.apex.tcp.ApexSocket;
+import de.jackwhite20.apex.tcp.pipeline.handler.UpstreamHandler;
 import de.jackwhite20.apex.util.BackendInfo;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
@@ -57,7 +57,7 @@ public class ApexChannelInitializer extends ChannelInitializer<SocketChannel> {
     @Override
     protected void initChannel(SocketChannel channel) throws Exception {
 
-        BackendInfo backendInfo = Apex.getBalancingStrategy()
+        BackendInfo backendInfo = ApexSocket.getBalancingStrategy()
                 .selectBackend(channel.remoteAddress().getHostName(), channel.remoteAddress().getPort());
 
         if (backendInfo == null) {
@@ -72,7 +72,7 @@ public class ApexChannelInitializer extends ChannelInitializer<SocketChannel> {
                 .addLast(new ReadTimeoutHandler(readTimeout))
                 .addLast(new WriteTimeoutHandler(writeTimeout));
 
-        GlobalTrafficShapingHandler trafficShapingHandler = Apex.getInstance().getTrafficShapingHandler();
+        GlobalTrafficShapingHandler trafficShapingHandler = ApexSocket.getInstance().getTrafficShapingHandler();
         if (trafficShapingHandler != null) {
             channel.pipeline().addLast(trafficShapingHandler);
         }

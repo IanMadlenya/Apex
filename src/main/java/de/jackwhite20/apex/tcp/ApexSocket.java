@@ -17,14 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.jackwhite20.apex.udp;
+package de.jackwhite20.apex.tcp;
 
 import de.jackwhite20.apex.Apex;
-import de.jackwhite20.apex.udp.pipeline.DatagramChannelHandler;
+import de.jackwhite20.apex.tcp.pipeline.initialize.ApexChannelInitializer;
 import de.jackwhite20.apex.util.PipelineUtils;
 import de.jackwhite20.cope.CopeConfig;
-import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -32,13 +31,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by JackWhite20 on 04.11.2016.
+ * Created by JackWhite20 on 26.06.2016.
  */
-public class ApexDatagram extends Apex {
+public class ApexSocket extends Apex {
 
-    private static Logger logger = LoggerFactory.getLogger(ApexDatagram.class);
+    private static Logger logger = LoggerFactory.getLogger(ApexSocket.class);
 
-    public ApexDatagram(CopeConfig copeConfig) {
+    public ApexSocket(CopeConfig copeConfig) {
 
         super(copeConfig);
     }
@@ -48,12 +47,13 @@ public class ApexDatagram extends Apex {
 
         logger.info("Bootstrapping datagram server");
 
-        // TODO: 05.11.2016 Traffic shaping handler
-        return new Bootstrap()
-                .group(workerGroup)
-                .channel(PipelineUtils.getDatagramChannel())
-                .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                .handler(new DatagramChannelHandler())
+        return new ServerBootstrap()
+                .group(bossGroup, workerGroup)
+                .channel(PipelineUtils.getServerChannel())
+                .childHandler(new ApexChannelInitializer(readTimeout, writeTimeout))
+                .childOption(ChannelOption.AUTO_READ, false)
+                .option(ChannelOption.TCP_NODELAY, true)
+                .option(ChannelOption.SO_BACKLOG, backlog)
                 .bind(ip, port)
                 .sync()
                 .channel();

@@ -20,7 +20,7 @@
 package de.jackwhite20.apex.rest.resource;
 
 import com.google.gson.Gson;
-import de.jackwhite20.apex.Apex;
+import de.jackwhite20.apex.tcp.ApexSocket;
 import de.jackwhite20.apex.rest.response.ApexListResponse;
 import de.jackwhite20.apex.rest.response.ApexResponse;
 import de.jackwhite20.apex.rest.response.ApexStatsResponse;
@@ -55,8 +55,8 @@ public class ApexResource {
     public Response add(Request httpRequest, @PathParam String name, @PathParam String ip, @PathParam String port) {
 
         BackendInfo found = null;
-        synchronized (Apex.getBalancingStrategy().getBackend()) {
-            for (BackendInfo info : Apex.getBalancingStrategy().getBackend()) {
+        synchronized (ApexSocket.getBalancingStrategy().getBackend()) {
+            for (BackendInfo info : ApexSocket.getBalancingStrategy().getBackend()) {
                 if (info.getName().equalsIgnoreCase(name)) {
                     found = info;
                     break;
@@ -66,8 +66,8 @@ public class ApexResource {
 
         if (found == null) {
             BackendInfo backend = new BackendInfo(name, ip, Integer.valueOf(port));
-            Apex.getBalancingStrategy().addBackend(backend);
-            Apex.getBackendTask().addBackend(backend);
+            ApexSocket.getBalancingStrategy().addBackend(backend);
+            ApexSocket.getBackendTask().addBackend(backend);
 
             logger.info("Added backend server {}:{} to the load balancer", ip, port);
 
@@ -85,8 +85,8 @@ public class ApexResource {
     public Response remove(Request httpRequest, @PathParam String name) {
 
         BackendInfo found = null;
-        synchronized (Apex.getBalancingStrategy().getBackend()) {
-            for (BackendInfo info : Apex.getBalancingStrategy().getBackend()) {
+        synchronized (ApexSocket.getBalancingStrategy().getBackend()) {
+            for (BackendInfo info : ApexSocket.getBalancingStrategy().getBackend()) {
                 if (info.getName().equalsIgnoreCase(name)) {
                     found = info;
                     break;
@@ -95,8 +95,8 @@ public class ApexResource {
         }
 
         if (found != null) {
-            Apex.getBalancingStrategy().removeBackend(found);
-            Apex.getBackendTask().removeBackend(found);
+            ApexSocket.getBalancingStrategy().removeBackend(found);
+            ApexSocket.getBackendTask().removeBackend(found);
 
             logger.info("Removed backend server {} from the load balancer", name);
 
@@ -113,7 +113,7 @@ public class ApexResource {
     @Produces(ContentType.APPLICATION_JSON)
     public Response list(Request httpRequest) {
 
-        BalancingStrategy balancingStrategy = Apex.getBalancingStrategy();
+        BalancingStrategy balancingStrategy = ApexSocket.getBalancingStrategy();
         if (balancingStrategy != null) {
             return Response.ok().content(gson.toJson(new ApexListResponse(ApexResponse.Status.OK, "List received",
                     balancingStrategy.getBackend()))).build();
@@ -129,14 +129,14 @@ public class ApexResource {
     @Produces(ContentType.APPLICATION_JSON)
     public Response stats(Request httpRequest) {
 
-        GlobalTrafficShapingHandler trafficShapingHandler = Apex.getInstance().getTrafficShapingHandler();
+        GlobalTrafficShapingHandler trafficShapingHandler = ApexSocket.getInstance().getTrafficShapingHandler();
         if (trafficShapingHandler != null) {
             TrafficCounter trafficCounter = trafficShapingHandler.trafficCounter();
 
             return Response.ok().content(gson.toJson(new ApexStatsResponse(ApexResponse.Status.OK,
                     "OK",
                     ConnectionManager.getConnections(),
-                    Apex.getBalancingStrategy().getBackend().size(),
+                    ApexSocket.getBalancingStrategy().getBackend().size(),
                     trafficCounter.currentReadBytes(),
                     trafficCounter.currentWrittenBytes(),
                     trafficCounter.lastReadThroughput(),

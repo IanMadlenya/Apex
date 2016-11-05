@@ -26,7 +26,6 @@ import de.jackwhite20.apex.command.impl.DebugCommand;
 import de.jackwhite20.apex.command.impl.EndCommand;
 import de.jackwhite20.apex.command.impl.HelpCommand;
 import de.jackwhite20.apex.command.impl.StatsCommand;
-import de.jackwhite20.apex.pipeline.initialize.ApexChannelInitializer;
 import de.jackwhite20.apex.rest.RestServer;
 import de.jackwhite20.apex.strategy.BalancingStrategy;
 import de.jackwhite20.apex.strategy.BalancingStrategyFactory;
@@ -39,9 +38,7 @@ import de.jackwhite20.apex.util.ReflectionUtil;
 import de.jackwhite20.cope.CopeConfig;
 import de.jackwhite20.cope.config.Header;
 import de.jackwhite20.cope.config.Key;
-import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.util.ResourceLeakDetector;
@@ -58,9 +55,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Created by JackWhite20 on 26.06.2016.
+ * Created by JackWhite20 on 05.11.2016.
  */
-public class Apex {
+public abstract class Apex {
 
     private static final String APEX_PACKAGE_NAME = "de.jackwhite20.apex";
 
@@ -103,6 +100,8 @@ public class Apex {
         this.commandManager = new CommandManager();
     }
 
+    public abstract Channel bootstrap(EventLoopGroup bossGroup, EventLoopGroup workerGroup, String ip, int port, int backlog, int readTimeout, int writeTimeout) throws Exception;
+
     public void start() {
 
         commandManager.addCommand(new HelpCommand("help", "List of available commands", "h"));
@@ -111,6 +110,7 @@ public class Apex {
         commandManager.addCommand(new StatsCommand("stats", "Shows live stats", "s", "info"));
 
         Header generalHeader = copeConfig.getHeader("general");
+        Key modeKey = generalHeader.getKey("mode");
         Key serverKey = generalHeader.getKey("server");
         Key balanceKey = generalHeader.getKey("balance");
         Key bossKey = generalHeader.getKey("boss");
@@ -122,26 +122,27 @@ public class Apex {
         Key statsKey = generalHeader.getKey("stats");
 
         // Set the log level to debug or info based on the config value
-        changeDebug((Boolean.valueOf(debugKey.getValue(0).asString())) ? Level.DEBUG : Level.INFO);
+        changeDebug((Boolean.valueOf(debugKey.next().asString())) ? Level.DEBUG : Level.INFO);
 
         List<BackendInfo> backendInfo = copeConfig.getHeader("backend").getKeys()
                 .stream()
                 .map(backend -> new BackendInfo(backend.getName(),
-                        backend.getValue(0).asString(),
-                        backend.getValue(1).asInt()))
+                        backend.next().asString(),
+                        backend.next().asInt()))
                 .collect(Collectors.toList());
 
-        logger.debug("Host: {}", serverKey.getValue(0).asString());
-        logger.debug("Port: {}", serverKey.getValue(1).asString());
-        logger.debug("Balance: {}", balanceKey.getValue(0).asString());
-        logger.debug("Backlog: {}", backlogKey.getValue(0).asInt());
-        logger.debug("Boss: {}", bossKey.getValue(0).asInt());
-        logger.debug("Worker: {}", workerKey.getValue(0).asInt());
-        logger.debug("Stats: {}", statsKey.getValue(0).asString());
-        logger.debug("Probe: {}", probeKey.getValue(0).asInt());
+        logger.debug("Mode: {}", modeKey.next().asString());
+        logger.debug("Host: {}", serverKey.next().asString());
+        logger.debug("Port: {}", serverKey.next().asString());
+        logger.debug("Balance: {}", balanceKey.next().asString());
+        logger.debug("Backlog: {}", backlogKey.next().asInt());
+        logger.debug("Boss: {}", bossKey.next().asInt());
+        logger.debug("Worker: {}", workerKey.next().asInt());
+        logger.debug("Stats: {}", statsKey.next().asString());
+        logger.debug("Probe: {}", probeKey.next().asInt());
         logger.debug("Backend: {}", backendInfo.stream().map(BackendInfo::getHost).collect(Collectors.joining(", ")));
 
-        StrategyType type = StrategyType.valueOf(balanceKey.getValue(0).asString());
+        StrategyType type = StrategyType.valueOf(balanceKey.next().asString());
 
         balancingStrategy = BalancingStrategyFactory.create(type, backendInfo);
 
@@ -155,7 +156,7 @@ public class Apex {
         }
 
         // Choose the type of the event loop group
-        int bossThreads = bossKey.getValue(0).asInt();
+        int bossThreads = bossKey.next().asInt();
         if (bossThreads < PipelineUtils.DEFAULT_THREADS_THRESHOLD) {
             bossThreads = PipelineUtils.DEFAULT_BOSS_THREADS;
 
@@ -164,7 +165,7 @@ public class Apex {
                     PipelineUtils.DEFAULT_BOSS_THREADS);
         }
 
-        int workerThreads = workerKey.getValue(0).asInt();
+        int workerThreads = workerKey.next().asInt();
         if (workerThreads < PipelineUtils.DEFAULT_THREADS_THRESHOLD) {
             workerThreads = PipelineUtils.DEFAULT_WORKER_THREADS;
 
@@ -177,19 +178,15 @@ public class Apex {
         workerGroup = PipelineUtils.newEventLoopGroup(workerThreads);
 
         try {
-            ServerBootstrap b = new ServerBootstrap();
-            serverChannel = b.group(bossGroup, workerGroup)
-                    .channel(PipelineUtils.getServerChannel())
-                    .childHandler(new ApexChannelInitializer(timeoutKey.getValue(0).asInt(),
-                            timeoutKey.getValue(1).asInt()))
-                    .childOption(ChannelOption.AUTO_READ, false)
-                    .option(ChannelOption.TCP_NODELAY, true)
-                    .option(ChannelOption.SO_BACKLOG, backlogKey.getValue(0).asInt())
-                    .bind(serverKey.getValue(0).asString(), serverKey.getValue(1).asInt())
-                    .sync()
-                    .channel();
+            serverChannel = bootstrap(bossGroup,
+                    workerGroup,
+                    serverKey.next().asString(),
+                    serverKey.next().asInt(),
+                    timeoutKey.next().asInt(),
+                    timeoutKey.next().asInt(),
+                    backlogKey.next().asInt());
 
-            int probe = probeKey.getValue(0).asInt();
+            int probe = probeKey.next().asInt();
             if (probe < -1 || probe == 0) {
                 probe = 10000;
 
@@ -197,6 +194,7 @@ public class Apex {
                 logger.warn("Using default probe time of 10000 milliseconds (10 seconds)");
             }
 
+            // TODO: 05.11.2016 Different check tasks based on the mode
             if (probe != -1) {
                 backendTask = new CheckBackendTask(balancingStrategy);
                 scheduledExecutorService.scheduleAtFixedRate(backendTask, 0, probe, TimeUnit.MILLISECONDS);
@@ -225,7 +223,7 @@ public class Apex {
             restServer = new RestServer(copeConfig);
             restServer.start();
 
-            logger.info("Apex listening on {}:{}", serverKey.getValue(0).asString(), serverKey.getValue(1).asInt());
+            logger.info("Apex listening on {}:{}", serverKey.next().asString(), serverKey.next().asInt());
         } catch (Exception e) {
             e.printStackTrace();
         }

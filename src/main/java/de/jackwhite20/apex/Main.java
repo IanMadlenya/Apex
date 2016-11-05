@@ -19,6 +19,7 @@
 
 package de.jackwhite20.apex;
 
+import de.jackwhite20.apex.util.Mode;
 import de.jackwhite20.apex.util.PipelineUtils;
 import de.jackwhite20.cope.Cope;
 import de.jackwhite20.cope.CopeConfig;
@@ -56,6 +57,7 @@ public class Main {
 
         try {
             CopeConfig copeConfig = Cope.from(config)
+                    .def(new Header("general"), new Key("mode"), new Value("tcp"))
                     .def(new Header("general"), new Key("server"), new Value("0.0.0.0"), new Value("80"))
                     .def(new Header("general"), new Key("backlog"), new Value("100"))
                     .def(new Header("general"), new Key("boss"), new Value(String.valueOf(PipelineUtils.DEFAULT_BOSS_THREADS)))
@@ -69,7 +71,16 @@ public class Main {
 
             logger.info("Config loaded");
 
-            Apex apex = new Apex(copeConfig);
+            String modeString = copeConfig.getHeader("general").getKey("mode").next().asString();
+            Mode mode = Mode.valueOf(modeString.toUpperCase());
+            if (mode == null) {
+                logger.error("Invalid mode '{}'", modeString);
+                return;
+            }
+
+            logger.info("Using mode: " + mode);
+
+            Apex apex = ApexFactory.create(mode, copeConfig);
             apex.start();
             apex.console();
         } catch (CopeException e) {

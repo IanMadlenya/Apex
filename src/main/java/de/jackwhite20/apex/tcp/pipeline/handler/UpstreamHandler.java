@@ -17,9 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.jackwhite20.apex.pipeline.handler;
+package de.jackwhite20.apex.tcp.pipeline.handler;
 
-import de.jackwhite20.apex.Apex;
+import de.jackwhite20.apex.tcp.ApexSocket;
 import de.jackwhite20.apex.util.BackendInfo;
 import de.jackwhite20.apex.util.ChannelUtil;
 import de.jackwhite20.apex.util.ConnectionManager;
@@ -106,7 +106,7 @@ public class UpstreamHandler extends ChannelHandlerAdapter {
 
         ChannelUtil.closeOnFlush(downstreamChannel);
 
-        Apex.getBalancingStrategy().disconnectedFrom(backendInfo);
+        ApexSocket.getBalancingStrategy().disconnectedFrom(backendInfo);
 
         // Decrement connection count
         ConnectionManager.decrement();

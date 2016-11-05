@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.jackwhite20.apex.pipeline.handler;
+package de.jackwhite20.apex.tcp.pipeline.handler;
 
 import de.jackwhite20.apex.util.ChannelUtil;
 import io.netty.channel.*;
