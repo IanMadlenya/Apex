@@ -81,7 +81,7 @@ public class Main {
             logger.info("Using mode: " + mode);
 
             Apex apex = ApexFactory.create(mode, copeConfig);
-            apex.start();
+            apex.start(mode);
             apex.console();
         } catch (CopeException e) {
             logger.error("Unable to load config", e);

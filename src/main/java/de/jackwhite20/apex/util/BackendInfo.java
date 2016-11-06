@@ -23,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
@@ -31,7 +33,13 @@ import java.net.Socket;
  */
 public class BackendInfo {
 
-    public static final int DEFAULT_TIMEOUT = 4000;
+    public static final int DEFAULT_TCP_TIMEOUT = 4000;
+
+    public static final int DEFAULT_UDP_TIMEOUT = 1500;
+
+    public static final byte[] EMPTY_BUFFER = new byte[] {};
+
+    public static final DatagramPacket EMPTY_PACKET = new DatagramPacket(EMPTY_BUFFER, EMPTY_BUFFER.length);
 
     private static Logger logger = LoggerFactory.getLogger(BackendInfo.class);
 
@@ -70,17 +78,37 @@ public class BackendInfo {
         return connectTime;
     }
 
-    public boolean check() {
+    public boolean checkSocket() {
+
+        boolean online = false;
 
         try (Socket socket = new Socket()) {
             long now = System.currentTimeMillis();
-            socket.connect(new InetSocketAddress(host, port), DEFAULT_TIMEOUT);
+            socket.connect(new InetSocketAddress(host, port), DEFAULT_TCP_TIMEOUT);
             connectTime = System.currentTimeMillis() - now;
 
-            return true;
+            online = true;
         } catch (IOException ignore) {}
 
-        return false;
+        return online;
+    }
+
+    public boolean checkDatagram() {
+
+        boolean online = false;
+
+        try (DatagramSocket datagramSocket = new DatagramSocket()) {
+            datagramSocket.setSoTimeout(DEFAULT_UDP_TIMEOUT);
+            long now = System.currentTimeMillis();
+            datagramSocket.connect(new InetSocketAddress(host, port));
+            datagramSocket.send(EMPTY_PACKET);
+            datagramSocket.receive(EMPTY_PACKET);
+            connectTime = System.currentTimeMillis() - now;
+
+            online = true;
+        } catch (Exception ignore) {}
+
+        return online;
     }
 
     @Override

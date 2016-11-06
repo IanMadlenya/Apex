@@ -23,27 +23,25 @@ import com.google.common.collect.Lists;
 import de.jackwhite20.apex.Apex;
 import de.jackwhite20.apex.strategy.BalancingStrategy;
 import de.jackwhite20.apex.util.BackendInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 /**
- * Created by JackWhite20 on 26.06.2016.
+ * Created by JackWhite20 on 06.11.2016.
  */
-public class CheckBackendTask implements Runnable {
+public abstract class CheckBackendTask implements Runnable {
 
-    private static Logger logger = LoggerFactory.getLogger(CheckBackendTask.class);
+    protected final List<BackendInfo> backendInfo;
 
-    private final List<BackendInfo> backendInfo;
-
-    private BalancingStrategy balancingStrategy;
+    protected BalancingStrategy balancingStrategy;
 
     public CheckBackendTask(BalancingStrategy balancingStrategy) {
 
         this.balancingStrategy = balancingStrategy;
         this.backendInfo = Lists.newArrayList(balancingStrategy.getBackend());
     }
+
+    public abstract void check();
 
     public synchronized void addBackend(BackendInfo backendInfo) {
 
@@ -62,28 +60,6 @@ public class CheckBackendTask implements Runnable {
             return;
         }
 
-        synchronized (balancingStrategy.getBackend()) {
-            synchronized (backendInfo) {
-                for (BackendInfo info : backendInfo) {
-                    if (info.check()) {
-                        if (!balancingStrategy.hasBackend(info)) {
-                            balancingStrategy.addBackend(info);
-                            logger.info("{} is up again and was added back to the load balancer", info.getName());
-                        }
-                    } else {
-                        if (balancingStrategy.hasBackend(info)) {
-                            logger.warn("{} went down and was removed from the load balancer", info.getName());
-                            balancingStrategy.removeBackend(info);
-
-                            if (balancingStrategy.getBackend().size() == 0) {
-                                logger.error("No more backend servers online");
-                            } else {
-                                logger.info("{} backend servers left", balancingStrategy.getBackend().size());
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        check();
     }
 }

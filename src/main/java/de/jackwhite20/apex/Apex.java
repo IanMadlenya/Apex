@@ -31,10 +31,9 @@ import de.jackwhite20.apex.strategy.BalancingStrategy;
 import de.jackwhite20.apex.strategy.BalancingStrategyFactory;
 import de.jackwhite20.apex.strategy.StrategyType;
 import de.jackwhite20.apex.task.CheckBackendTask;
-import de.jackwhite20.apex.util.BackendInfo;
-import de.jackwhite20.apex.util.FileUtil;
-import de.jackwhite20.apex.util.PipelineUtils;
-import de.jackwhite20.apex.util.ReflectionUtil;
+import de.jackwhite20.apex.task.impl.CheckDatagramBackendTask;
+import de.jackwhite20.apex.task.impl.CheckSocketBackendTask;
+import de.jackwhite20.apex.util.*;
 import de.jackwhite20.cope.CopeConfig;
 import de.jackwhite20.cope.config.Header;
 import de.jackwhite20.cope.config.Key;
@@ -107,7 +106,7 @@ public abstract class Apex {
 
     public abstract Channel bootstrap(EventLoopGroup bossGroup, EventLoopGroup workerGroup, String ip, int port, int backlog, int readTimeout, int writeTimeout) throws Exception;
 
-    public void start() {
+    public void start(Mode mode) {
 
         commandManager.addCommand(new HelpCommand("help", "List of available commands", "h"));
         commandManager.addCommand(new EndCommand("end", "Stops Apex", "stop", "exit"));
@@ -115,7 +114,6 @@ public abstract class Apex {
         commandManager.addCommand(new StatsCommand("stats", "Shows live stats", "s", "info"));
 
         Header generalHeader = copeConfig.getHeader("general");
-        Key modeKey = generalHeader.getKey("mode");
         Key serverKey = generalHeader.getKey("server");
         Key balanceKey = generalHeader.getKey("balance");
         Key bossKey = generalHeader.getKey("boss");
@@ -136,7 +134,7 @@ public abstract class Apex {
                         backend.next().asInt()))
                 .collect(Collectors.toList());
 
-        logger.debug("Mode: {}", modeKey.next().asString());
+        logger.debug("Mode: {}", mode);
         logger.debug("Host: {}", serverKey.next().asString());
         logger.debug("Port: {}", serverKey.next().asString());
         logger.debug("Balance: {}", balanceKey.next().asString());
@@ -199,9 +197,10 @@ public abstract class Apex {
                 logger.warn("Using default probe time of 10000 milliseconds (10 seconds)");
             }
 
-            // TODO: 05.11.2016 Different check tasks based on the mode
             if (probe != -1) {
-                backendTask = new CheckBackendTask(balancingStrategy);
+                backendTask = (mode == Mode.TCP) ? new CheckSocketBackendTask(balancingStrategy) :
+                        new CheckDatagramBackendTask(balancingStrategy);
+
                 scheduledExecutorService.scheduleAtFixedRate(backendTask, 0, probe, TimeUnit.MILLISECONDS);
             } else {
                 // Shutdown unnecessary scheduler
