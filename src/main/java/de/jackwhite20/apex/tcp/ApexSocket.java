@@ -20,7 +20,7 @@
 package de.jackwhite20.apex.tcp;
 
 import de.jackwhite20.apex.Apex;
-import de.jackwhite20.apex.tcp.pipeline.initialize.ApexChannelInitializer;
+import de.jackwhite20.apex.tcp.pipeline.initialize.ApexSocketChannelInitializer;
 import de.jackwhite20.apex.util.PipelineUtils;
 import de.jackwhite20.cope.CopeConfig;
 import io.netty.bootstrap.ServerBootstrap;
@@ -50,7 +50,7 @@ public class ApexSocket extends Apex {
         return new ServerBootstrap()
                 .group(bossGroup, workerGroup)
                 .channel(PipelineUtils.getServerChannel())
-                .childHandler(new ApexChannelInitializer(readTimeout, writeTimeout))
+                .childHandler(new ApexSocketChannelInitializer(readTimeout, writeTimeout))
                 .childOption(ChannelOption.AUTO_READ, false)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_BACKLOG, backlog)

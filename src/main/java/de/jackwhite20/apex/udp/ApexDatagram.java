@@ -20,7 +20,7 @@
 package de.jackwhite20.apex.udp;
 
 import de.jackwhite20.apex.Apex;
-import de.jackwhite20.apex.udp.pipeline.DatagramChannelHandler;
+import de.jackwhite20.apex.udp.pipeline.DatagramUpstreamHandler;
 import de.jackwhite20.apex.util.PipelineUtils;
 import de.jackwhite20.cope.CopeConfig;
 import io.netty.bootstrap.Bootstrap;
@@ -52,7 +52,7 @@ public class ApexDatagram extends Apex {
                 .group(workerGroup)
                 .channel(PipelineUtils.getDatagramChannel())
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                .handler(new DatagramChannelHandler())
+                .handler(new DatagramUpstreamHandler())
                 .bind(ip, port)
                 .sync()
                 .channel();

@@ -35,15 +35,15 @@ import java.io.IOException;
 /**
  * Created by JackWhite20 on 26.06.2016.
  */
-public class UpstreamHandler extends ChannelHandlerAdapter {
+public class SocketUpstreamHandler extends ChannelHandlerAdapter {
 
-    private static Logger logger = LoggerFactory.getLogger(UpstreamHandler.class);
+    private static Logger logger = LoggerFactory.getLogger(SocketUpstreamHandler.class);
 
     private BackendInfo backendInfo;
 
     private Channel downstreamChannel;
 
-    public UpstreamHandler(BackendInfo backendInfo) {
+    public SocketUpstreamHandler(BackendInfo backendInfo) {
 
         this.backendInfo = backendInfo;
     }
@@ -56,7 +56,7 @@ public class UpstreamHandler extends ChannelHandlerAdapter {
         Bootstrap b = new Bootstrap()
                 .group(inboundChannel.eventLoop())
                 .channel(PipelineUtils.getChannel())
-                .handler(new DownstreamHandler(inboundChannel))
+                .handler(new SocketDownstreamHandler(inboundChannel))
                 .option(ChannelOption.TCP_NODELAY, true)
                 // No initial connection should take longer than 4 seconds
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, BackendInfo.DEFAULT_TCP_TIMEOUT)

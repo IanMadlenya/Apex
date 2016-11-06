@@ -21,7 +21,7 @@ package de.jackwhite20.apex.tcp.pipeline.initialize;
 
 import com.google.common.base.Preconditions;
 import de.jackwhite20.apex.Apex;
-import de.jackwhite20.apex.tcp.pipeline.handler.UpstreamHandler;
+import de.jackwhite20.apex.tcp.pipeline.handler.SocketUpstreamHandler;
 import de.jackwhite20.apex.util.BackendInfo;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
@@ -34,15 +34,15 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by JackWhite20 on 26.06.2016.
  */
-public class ApexChannelInitializer extends ChannelInitializer<SocketChannel> {
+public class ApexSocketChannelInitializer extends ChannelInitializer<SocketChannel> {
 
-    private Logger logger = LoggerFactory.getLogger(ApexChannelInitializer.class);
+    private Logger logger = LoggerFactory.getLogger(ApexSocketChannelInitializer.class);
 
     private int readTimeout;
 
     private int writeTimeout;
 
-    public ApexChannelInitializer(int readTimeout, int writeTimeout) {
+    public ApexSocketChannelInitializer(int readTimeout, int writeTimeout) {
 
         Preconditions.checkState(readTimeout > 0, "readTimeout cannot be negative");
         Preconditions.checkState(writeTimeout > 0, "writeTimeout cannot be negative");
@@ -77,7 +77,7 @@ public class ApexChannelInitializer extends ChannelInitializer<SocketChannel> {
             channel.pipeline().addLast(trafficShapingHandler);
         }
 
-        channel.pipeline().addLast(new UpstreamHandler(backendInfo));
+        channel.pipeline().addLast(new SocketUpstreamHandler(backendInfo));
 
         logger.debug("Connected [{}] <-> [{}:{} ({})]", channel.remoteAddress(), backendInfo.getHost(), backendInfo.getPort(), backendInfo.getName());
     }

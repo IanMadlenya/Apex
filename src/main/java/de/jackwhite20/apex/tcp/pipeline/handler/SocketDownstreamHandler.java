@@ -30,13 +30,13 @@ import java.io.IOException;
 /**
  * Created by JackWhite20 on 26.06.2016.
  */
-public class DownstreamHandler extends ChannelHandlerAdapter {
+public class SocketDownstreamHandler extends ChannelHandlerAdapter {
 
-    private static Logger logger = LoggerFactory.getLogger(DownstreamHandler.class);
+    private static Logger logger = LoggerFactory.getLogger(SocketDownstreamHandler.class);
 
     private Channel inboundChannel;
 
-    public DownstreamHandler(Channel inboundChannel) {
+    public SocketDownstreamHandler(Channel inboundChannel) {
 
         this.inboundChannel = inboundChannel;
     }

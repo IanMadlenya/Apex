@@ -26,10 +26,7 @@ import de.jackwhite20.apex.util.ChannelUtil;
 import de.jackwhite20.apex.util.PipelineUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import org.slf4j.Logger;
@@ -41,9 +38,9 @@ import java.net.InetSocketAddress;
 /**
  * Created by JackWhite20 on 05.11.2016.
  */
-public class DatagramChannelHandler extends SimpleChannelInboundHandler<DatagramPacket> {
+public class DatagramUpstreamHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
-    private Logger logger = LoggerFactory.getLogger(DatagramChannelHandler.class);
+    private static Logger logger = LoggerFactory.getLogger(DatagramUpstreamHandler.class);
 
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, DatagramPacket datagramPacket) throws Exception {
@@ -51,9 +48,6 @@ public class DatagramChannelHandler extends SimpleChannelInboundHandler<Datagram
         BackendInfo backendInfo = ApexDatagram.getBalancingStrategy().selectBackend("", 0);
 
         if (backendInfo == null) {
-            // Gracefully close the channel
-            ctx.close();
-
             logger.error("Unable to select a backend server. All down?");
             return;
         }
@@ -79,10 +73,11 @@ public class DatagramChannelHandler extends SimpleChannelInboundHandler<Datagram
             @Override
             public void operationComplete(ChannelFuture channelFuture) throws Exception {
 
+                Channel channel = channelFuture.channel();
                 if (channelFuture.isSuccess()) {
-                    channelFuture.channel().writeAndFlush(new DatagramPacket(copy.retain(), new InetSocketAddress(backendInfo.getHost(), backendInfo.getPort())));
+                    channel.writeAndFlush(new DatagramPacket(copy.retain(), new InetSocketAddress(backendInfo.getHost(), backendInfo.getPort())));
                 } else {
-                    ChannelUtil.close(ctx.channel());
+                    ChannelUtil.close(channel);
                 }
             }
         });

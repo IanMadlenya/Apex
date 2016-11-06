@@ -158,7 +158,7 @@ public abstract class Apex {
             logger.info("Using normal select/poll event notification mechanism");
         }
 
-        // Choose the type of the event loop group
+        // Check boss thread config value
         int bossThreads = bossKey.next().asInt();
         if (bossThreads < PipelineUtils.DEFAULT_THREADS_THRESHOLD) {
             bossThreads = PipelineUtils.DEFAULT_BOSS_THREADS;
@@ -168,6 +168,7 @@ public abstract class Apex {
                     PipelineUtils.DEFAULT_BOSS_THREADS);
         }
 
+        // Check worker thread config value
         int workerThreads = workerKey.next().asInt();
         if (workerThreads < PipelineUtils.DEFAULT_THREADS_THRESHOLD) {
             workerThreads = PipelineUtils.DEFAULT_WORKER_THREADS;
@@ -185,9 +186,9 @@ public abstract class Apex {
                     workerGroup,
                     serverKey.next().asString(),
                     serverKey.next().asInt(),
+                    backlogKey.next().asInt(),
                     timeoutKey.next().asInt(),
-                    timeoutKey.next().asInt(),
-                    backlogKey.next().asInt());
+                    timeoutKey.next().asInt());
 
             int probe = probeKey.next().asInt();
             if (probe < -1 || probe == 0) {

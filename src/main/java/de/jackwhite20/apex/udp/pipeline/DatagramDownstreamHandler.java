@@ -56,12 +56,6 @@ public class DatagramDownstreamHandler extends SimpleChannelInboundHandler<Datag
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-
-        ChannelUtil.close(channel);
-    }
-
-    @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 
         ChannelUtil.close(ctx.channel());
