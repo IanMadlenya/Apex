@@ -40,8 +40,11 @@ import de.jackwhite20.cope.config.Header;
 import de.jackwhite20.cope.config.Key;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.util.ResourceLeakDetector;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,6 +93,8 @@ public abstract class Apex {
     private CommandManager commandManager;
 
     private Scanner scanner;
+
+    private ChannelGroup channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     public Apex(CopeConfig copeConfig) {
 
@@ -292,13 +297,13 @@ public abstract class Apex {
             serverChannel.close();
         }
 
-        FileUtil.saveStats(trafficShapingHandler.trafficCounter().cumulativeReadBytes(),
-                trafficShapingHandler.trafficCounter().cumulativeWrittenBytes());
-
-        logger.info("Total bytes stats saved");
-
         // Release the traffic shaping handler
         if (trafficShapingHandler != null) {
+            FileUtil.saveStats(trafficShapingHandler.trafficCounter().cumulativeReadBytes(),
+                    trafficShapingHandler.trafficCounter().cumulativeWrittenBytes());
+
+            logger.info("Total bytes stats saved");
+
             trafficShapingHandler.release();
         }
 
@@ -335,6 +340,11 @@ public abstract class Apex {
     public static Channel getServerChannel() {
 
         return instance.serverChannel;
+    }
+
+    public static ChannelGroup getChannelGroup() {
+
+        return instance.channelGroup;
     }
 
     public GlobalTrafficShapingHandler getTrafficShapingHandler() {

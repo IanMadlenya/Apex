@@ -19,10 +19,10 @@
 
 package de.jackwhite20.apex.tcp.pipeline.handler;
 
+import de.jackwhite20.apex.Apex;
 import de.jackwhite20.apex.tcp.ApexSocket;
 import de.jackwhite20.apex.util.BackendInfo;
 import de.jackwhite20.apex.util.ChannelUtil;
-import de.jackwhite20.apex.util.ConnectionManager;
 import de.jackwhite20.apex.util.PipelineUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -71,15 +71,14 @@ public class UpstreamHandler extends ChannelHandlerAdapter {
 
                 if (future.isSuccess()) {
                     inboundChannel.read();
-
-                    // Increment connection count only if
-                    // successfully connected to a backend
-                    ConnectionManager.increment();
                 } else {
                     inboundChannel.close();
                 }
             }
         });
+
+        // Add the channel to the channel group
+        Apex.getChannelGroup().add(inboundChannel);
     }
 
     @Override
@@ -107,9 +106,6 @@ public class UpstreamHandler extends ChannelHandlerAdapter {
         ChannelUtil.closeOnFlush(downstreamChannel);
 
         ApexSocket.getBalancingStrategy().disconnectedFrom(backendInfo);
-
-        // Decrement connection count
-        ConnectionManager.decrement();
 
         logger.debug("Disconnected [{}] <-> [{}:{} ({})]", ctx.channel().remoteAddress(), backendInfo.getHost(), backendInfo.getPort(), backendInfo.getName());
     }

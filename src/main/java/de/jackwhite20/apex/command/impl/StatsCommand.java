@@ -21,7 +21,6 @@ package de.jackwhite20.apex.command.impl;
 
 import de.jackwhite20.apex.Apex;
 import de.jackwhite20.apex.command.Command;
-import de.jackwhite20.apex.util.ConnectionManager;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import io.netty.handler.traffic.TrafficCounter;
 import org.slf4j.Logger;
@@ -42,7 +41,7 @@ public class StatsCommand extends Command {
     @Override
     public boolean execute(String[] args) {
 
-        logger.info("Connections: {}", ConnectionManager.getConnections());
+        logger.info("Connections: {}", Apex.getChannelGroup().size());
         logger.info("Online backend servers: {}", Apex.getBalancingStrategy().getBackend().size());
 
         GlobalTrafficShapingHandler trafficShapingHandler = Apex.getInstance().getTrafficShapingHandler();

@@ -26,7 +26,6 @@ import de.jackwhite20.apex.rest.response.ApexResponse;
 import de.jackwhite20.apex.rest.response.ApexStatsResponse;
 import de.jackwhite20.apex.strategy.BalancingStrategy;
 import de.jackwhite20.apex.util.BackendInfo;
-import de.jackwhite20.apex.util.ConnectionManager;
 import de.jackwhite20.cobra.server.http.Request;
 import de.jackwhite20.cobra.server.http.annotation.Path;
 import de.jackwhite20.cobra.server.http.annotation.PathParam;
@@ -45,9 +44,26 @@ import org.slf4j.LoggerFactory;
 @Path("/apex")
 public class ApexResource {
 
+    private static final Response STATS_DISABLED;
+
     private static Logger logger = LoggerFactory.getLogger(ApexResource.class);
 
     private static Gson gson = new Gson();
+
+    private static GlobalTrafficShapingHandler trafficShapingHandler = Apex.getInstance().getTrafficShapingHandler();
+
+    static {
+        STATS_DISABLED = Response.ok().content(gson.toJson(new ApexStatsResponse(ApexResponse.Status.ERROR,
+                "Stats are disabled",
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1))).build();
+    }
 
     @GET
     @Path("/add/{name}/{ip}/{port}")
@@ -129,13 +145,12 @@ public class ApexResource {
     @Produces(ContentType.APPLICATION_JSON)
     public Response stats(Request httpRequest) {
 
-        GlobalTrafficShapingHandler trafficShapingHandler = Apex.getInstance().getTrafficShapingHandler();
         if (trafficShapingHandler != null) {
             TrafficCounter trafficCounter = trafficShapingHandler.trafficCounter();
 
             return Response.ok().content(gson.toJson(new ApexStatsResponse(ApexResponse.Status.OK,
                     "OK",
-                    ConnectionManager.getConnections(),
+                    Apex.getChannelGroup().size(),
                     Apex.getBalancingStrategy().getBackend().size(),
                     trafficCounter.currentReadBytes(),
                     trafficCounter.currentWrittenBytes(),
@@ -144,16 +159,7 @@ public class ApexResource {
                     trafficCounter.cumulativeReadBytes(),
                     trafficCounter.cumulativeWrittenBytes()))).build();
         } else {
-            return Response.ok().content(gson.toJson(new ApexStatsResponse(ApexResponse.Status.ERROR,
-                    "Stats are disabled",
-                    -1,
-                    -1,
-                    -1,
-                    -1,
-                    -1,
-                    -1,
-                    -1,
-                    -1))).build();
+            return STATS_DISABLED;
         }
     }
 }
