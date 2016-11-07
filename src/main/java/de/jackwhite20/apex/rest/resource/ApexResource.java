@@ -25,6 +25,7 @@ import de.jackwhite20.apex.rest.response.ApexListResponse;
 import de.jackwhite20.apex.rest.response.ApexResponse;
 import de.jackwhite20.apex.rest.response.ApexStatsResponse;
 import de.jackwhite20.apex.strategy.BalancingStrategy;
+import de.jackwhite20.apex.task.ConnectionsPerSecondTask;
 import de.jackwhite20.apex.util.BackendInfo;
 import de.jackwhite20.cobra.server.http.Request;
 import de.jackwhite20.cobra.server.http.annotation.Path;
@@ -52,9 +53,12 @@ public class ApexResource {
 
     private static GlobalTrafficShapingHandler trafficShapingHandler = Apex.getInstance().getTrafficShapingHandler();
 
+    private static ConnectionsPerSecondTask connectionsPerSecondTask = Apex.getInstance().getConnectionsPerSecondTask();
+
     static {
         STATS_DISABLED = Response.ok().content(gson.toJson(new ApexStatsResponse(ApexResponse.Status.ERROR,
                 "Stats are disabled",
+                -1,
                 -1,
                 -1,
                 -1,
@@ -151,6 +155,7 @@ public class ApexResource {
             return Response.ok().content(gson.toJson(new ApexStatsResponse(ApexResponse.Status.OK,
                     "OK",
                     Apex.getChannelGroup().size(),
+                    connectionsPerSecondTask.getPerSecond(),
                     Apex.getBalancingStrategy().getBackend().size(),
                     trafficCounter.currentReadBytes(),
                     trafficCounter.currentWrittenBytes(),

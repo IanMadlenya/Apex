@@ -20,6 +20,7 @@
 package de.jackwhite20.apex.udp.pipeline;
 
 import de.jackwhite20.apex.Apex;
+import de.jackwhite20.apex.task.ConnectionsPerSecondTask;
 import de.jackwhite20.apex.udp.ApexDatagram;
 import de.jackwhite20.apex.util.BackendInfo;
 import de.jackwhite20.apex.util.ChannelUtil;
@@ -41,6 +42,14 @@ import java.net.InetSocketAddress;
 public class DatagramUpstreamHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
     private static Logger logger = LoggerFactory.getLogger(DatagramUpstreamHandler.class);
+
+    private ConnectionsPerSecondTask connectionsPerSecondTask;
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+
+        connectionsPerSecondTask = Apex.getInstance().getConnectionsPerSecondTask();
+    }
 
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, DatagramPacket datagramPacket) throws Exception {
@@ -81,6 +90,11 @@ public class DatagramUpstreamHandler extends SimpleChannelInboundHandler<Datagra
                 }
             }
         });
+
+        // Keep track of request per second
+        if (connectionsPerSecondTask != null) {
+            connectionsPerSecondTask.inc();
+        }
     }
 
     @Override

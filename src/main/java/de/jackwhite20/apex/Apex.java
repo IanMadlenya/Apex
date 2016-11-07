@@ -31,6 +31,7 @@ import de.jackwhite20.apex.strategy.BalancingStrategy;
 import de.jackwhite20.apex.strategy.BalancingStrategyFactory;
 import de.jackwhite20.apex.strategy.StrategyType;
 import de.jackwhite20.apex.task.CheckBackendTask;
+import de.jackwhite20.apex.task.ConnectionsPerSecondTask;
 import de.jackwhite20.apex.task.impl.CheckDatagramBackendTask;
 import de.jackwhite20.apex.task.impl.CheckSocketBackendTask;
 import de.jackwhite20.apex.util.*;
@@ -94,6 +95,8 @@ public abstract class Apex {
     private Scanner scanner;
 
     private ChannelGroup channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+
+    private ConnectionsPerSecondTask connectionsPerSecondTask;
 
     public Apex(CopeConfig copeConfig) {
 
@@ -181,6 +184,13 @@ public abstract class Apex {
         bossGroup = PipelineUtils.newEventLoopGroup(bossThreads);
         workerGroup = PipelineUtils.newEventLoopGroup(workerThreads);
 
+        boolean stats = statsKey.next().asBoolean();
+
+        if (stats) {
+            // Only measure connections per second if stats are enabled
+            connectionsPerSecondTask = new ConnectionsPerSecondTask();
+        }
+
         try {
             serverChannel = bootstrap(bossGroup,
                     workerGroup,
@@ -208,7 +218,7 @@ public abstract class Apex {
                 scheduledExecutorService.shutdown();
             }
 
-            if (statsKey.next().asBoolean()) {
+            if (stats) {
                 // Load the total stats
                 long[] totalBytes = FileUtil.loadStats();
 
@@ -297,6 +307,10 @@ public abstract class Apex {
             serverChannel.close();
         }
 
+        if (connectionsPerSecondTask != null) {
+            connectionsPerSecondTask.stop();
+        }
+
         // Release the traffic shaping handler
         if (trafficShapingHandler != null) {
             FileUtil.saveStats(trafficShapingHandler.trafficCounter().cumulativeReadBytes(),
@@ -350,6 +364,11 @@ public abstract class Apex {
     public GlobalTrafficShapingHandler getTrafficShapingHandler() {
 
         return trafficShapingHandler;
+    }
+
+    public ConnectionsPerSecondTask getConnectionsPerSecondTask() {
+
+        return connectionsPerSecondTask;
     }
 
     public static Apex getInstance() {

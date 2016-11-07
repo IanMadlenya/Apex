@@ -27,6 +27,8 @@ public class ApexStatsResponse extends ApexResponse {
 
     private int connections;
 
+    private int connectionsPerSecond;
+
     private int onlineBackendServers;
 
     private long currentReadBytes;
@@ -41,11 +43,12 @@ public class ApexStatsResponse extends ApexResponse {
 
     private long totalWrittenBytes;
 
-    public ApexStatsResponse(Status status, String message, int connections, int onlineBackendServers, long currentReadBytes, long currentWrittenBytes, long lastReadThroughput, long lastWriteThroughput, long totalReadBytes, long totalWrittenBytes) {
+    public ApexStatsResponse(Status status, String message, int connections, int connectionsPerSecond, int onlineBackendServers, long currentReadBytes, long currentWrittenBytes, long lastReadThroughput, long lastWriteThroughput, long totalReadBytes, long totalWrittenBytes) {
 
         super(status, message);
 
         this.connections = connections;
+        this.connectionsPerSecond = connectionsPerSecond;
         this.onlineBackendServers = onlineBackendServers;
         this.currentReadBytes = currentReadBytes;
         this.currentWrittenBytes = currentWrittenBytes;

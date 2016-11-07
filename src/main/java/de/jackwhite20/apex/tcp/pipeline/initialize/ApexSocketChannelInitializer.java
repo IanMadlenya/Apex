@@ -21,6 +21,7 @@ package de.jackwhite20.apex.tcp.pipeline.initialize;
 
 import com.google.common.base.Preconditions;
 import de.jackwhite20.apex.Apex;
+import de.jackwhite20.apex.task.ConnectionsPerSecondTask;
 import de.jackwhite20.apex.tcp.pipeline.handler.SocketUpstreamHandler;
 import de.jackwhite20.apex.util.BackendInfo;
 import io.netty.channel.ChannelInitializer;
@@ -42,6 +43,8 @@ public class ApexSocketChannelInitializer extends ChannelInitializer<SocketChann
 
     private int writeTimeout;
 
+    private ConnectionsPerSecondTask connectionsPerSecondTask;
+
     public ApexSocketChannelInitializer(int readTimeout, int writeTimeout) {
 
         Preconditions.checkState(readTimeout > 0, "readTimeout cannot be negative");
@@ -49,6 +52,7 @@ public class ApexSocketChannelInitializer extends ChannelInitializer<SocketChann
 
         this.readTimeout = readTimeout;
         this.writeTimeout = writeTimeout;
+        this.connectionsPerSecondTask = Apex.getInstance().getConnectionsPerSecondTask();
 
         logger.debug("Read timeout: {}", readTimeout);
         logger.debug("Write timeout: {}", writeTimeout);
@@ -78,6 +82,11 @@ public class ApexSocketChannelInitializer extends ChannelInitializer<SocketChann
         }
 
         channel.pipeline().addLast(new SocketUpstreamHandler(backendInfo));
+
+        // Keep track of connections per second
+        if (connectionsPerSecondTask != null) {
+            connectionsPerSecondTask.inc();
+        }
 
         logger.debug("Connected [{}] <-> [{}:{} ({})]", channel.remoteAddress(), backendInfo.getHost(), backendInfo.getPort(), backendInfo.getName());
     }
