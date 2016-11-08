@@ -12,7 +12,7 @@
   <body>
     <section class="page-header">
       <h1 class="project-name">Apex</h1>
-      <h2 class="project-tagline">Apex is a high performance TCP reverse proxy server with load balancing capabilities.</h2>
+      <h2 class="project-tagline">Apex is a high performance TCP/UDP reverse proxy server with load balancing capabilities.</h2>
       <a href="https://github.com/JackWhite20/Apex" class="btn">View on GitHub</a>
       <a href="https://github.com/JackWhite20/Apex/zipball/master" class="btn">Download .zip</a>
       <a href="https://github.com/JackWhite20/Apex/tarball/master" class="btn">Download .tar.gz</a>
@@ -35,6 +35,7 @@ The RESTful API also gives you the opportunity to get live traffic and general s
 <li><a href="https://jackwhite20.github.io/Apex/#features">Features</a></li>
 <li><a href="https://jackwhite20.github.io/Apex/#installation">Installation</a></li>
 <li><a href="https://jackwhite20.github.io/Apex/#config">Config</a></li>
+<li><a href="https://jackwhite20.github.io/Apex/#udp">UDP</a></li>
 <li><a href="https://jackwhite20.github.io/Apex/#real-world-stats">Real-World stats</a></li>
 <li><a href="https://jackwhite20.github.io/Apex/#restful-api">RESTful API</a></li>
 </ul>
@@ -55,6 +56,7 @@ The RESTful API also gives you the opportunity to get live traffic and general s
 <li>logging (debug logging configurable)</li>
 <li>live traffic and other stats</li>
 <li>persistent total read/written stats</li>
+<li>TCP and UDP support</li>
 </ul>
 
 <h1>
@@ -64,7 +66,7 @@ The RESTful API also gives you the opportunity to get live traffic and general s
 
 <p>Download the latest Apex version from the <a href="https://github.com/JackWhite20/Apex/releases">release page</a> and start it like this:</p>
 
-<pre><code>java -jar apex-1.6.0.jar
+<pre><code>java -jar apex-1.7.1.jar
 </code></pre>
 
 <p>Stop it by typing <code>end</code> followed by an enter press. Configure the config.cope file in the same directory to fit your needs and restart Apex.</p>
@@ -113,6 +115,7 @@ The RESTful API also gives you the opportunity to get live traffic and general s
 <span class="pl-c"># If stats is true Apex will collect traffic stats that are </span>
 <span class="pl-c"># accessible through the RESTful API</span>
 general:
+    mode tcp
     debug true
     server 0.0.0.0 80
     backlog 100
@@ -135,6 +138,16 @@ backend:
     api-02 172.16.0.11 8080
     api-03 172.16.0.12 8080
     api-04 172.16.0.13 8080</pre></div>
+
+<h1>
+<a id="udp" class="anchor" href="#udp" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>UDP</h1>
+
+<p>Some special hints for the UDP protocol:</p>
+
+<p>When using the 'mode udp', keep in mind that the connections per second are more likely something like packets or messages per second because there are no connections at any time.
+The connections value from the RESTful API will be zero, because no connections exists as mentioned above.</p>
+
+<p>Also important is that the health check will fail if your UDP backend servers doesn't send the "ICMP: Destination/Port Unreachable" packet properly, due to a firewall or something like that.</p>
 
 <h1>
 <a id="real-world-stats" class="anchor" href="#real-world-stats" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Real-World stats</h1>
@@ -221,7 +234,7 @@ RAM: 4 GB</p>
 </tr>
 <tr>
 <td>/apex/stats</td>
-<td><code>{"connections":360,"onlineBackendServers":3,"currentReadBytes":500,"currentWrittenBytes":25356,"lastReadThroughput":36,"lastWriteThroughput":39864,"totalReadBytes":929,"totalWrittenBytes":705887}</code></td>
+<td><code>{"connections":360,"connectionsPerSecond":10,"onlineBackendServers":3,"currentReadBytes":500,"currentWrittenBytes":25356,"lastReadThroughput":36,"lastWriteThroughput":39864,"totalReadBytes":929,"totalWrittenBytes":705887}</code></td>
 <td><code>{"connections":-1,"onlineBackendServers":-1,"currentReadBytes":-1,"currentWriteBytes":-1,"lastReadThroughput":-1,"lastWriteThroughput":-1,"totalReadBytes":-1,"totalWrittenBytes":-1,"status":"ERROR","message":"Stats are disabled"}</code></td>
 </tr>
 </tbody>
