@@ -184,11 +184,24 @@ public abstract class Apex {
         bossGroup = PipelineUtils.newEventLoopGroup(bossThreads);
         workerGroup = PipelineUtils.newEventLoopGroup(workerThreads);
 
-        boolean stats = statsKey.next().asBoolean();
-
-        if (stats) {
+        if (statsKey.next().asBoolean()) {
             // Only measure connections per second if stats are enabled
             connectionsPerSecondTask = new ConnectionsPerSecondTask();
+
+            // Load the total stats
+            long[] totalBytes = FileUtil.loadStats();
+
+            logger.debug("Loaded total read bytes: {}", totalBytes[0]);
+            logger.debug("Loaded total written bytes: {}", totalBytes[1]);
+
+            // Traffic shaping handler with default check interval of one second
+            trafficShapingHandler = new GlobalTrafficShapingHandler(workerGroup, 0, 0);
+
+            // Set the total stats
+            ReflectionUtil.setAtomicLong(trafficShapingHandler.trafficCounter(), "cumulativeReadBytes", totalBytes[0]);
+            ReflectionUtil.setAtomicLong(trafficShapingHandler.trafficCounter(), "cumulativeWrittenBytes", totalBytes[1]);
+
+            logger.debug("Traffic stats collect handler initialized");
         }
 
         try {
@@ -216,27 +229,6 @@ public abstract class Apex {
             } else {
                 // Shutdown unnecessary scheduler
                 scheduledExecutorService.shutdown();
-            }
-
-            if (stats) {
-                // Load the total stats
-                long[] totalBytes = FileUtil.loadStats();
-
-                logger.debug("Loaded total read bytes: {}", totalBytes[0]);
-                logger.debug("Loaded total written bytes: {}", totalBytes[1]);
-
-                // Traffic shaping handler with default check interval of one second
-                trafficShapingHandler = new GlobalTrafficShapingHandler(workerGroup, 0, 0);
-
-                // Set the total stats
-                ReflectionUtil.setAtomicLong(trafficShapingHandler.trafficCounter(), "cumulativeReadBytes", totalBytes[0]);
-                ReflectionUtil.setAtomicLong(trafficShapingHandler.trafficCounter(), "cumulativeWrittenBytes", totalBytes[1]);
-
-                logger.debug("Traffic stats collect handler initialized");
-
-                // Add the traffic shaping handler to the server channel pipeline
-                // The handler needs to be the first handler in the pipeline
-                serverChannel.pipeline().addFirst(trafficShapingHandler);
             }
 
             restServer = new RestServer(copeConfig);

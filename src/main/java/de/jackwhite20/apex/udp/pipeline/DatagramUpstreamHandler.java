@@ -49,6 +49,9 @@ public class DatagramUpstreamHandler extends SimpleChannelInboundHandler<Datagra
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
 
         connectionsPerSecondTask = Apex.getInstance().getConnectionsPerSecondTask();
+
+        // Add the traffic counter
+        ctx.channel().pipeline().addLast(Apex.getInstance().getTrafficShapingHandler());
     }
 
     @Override

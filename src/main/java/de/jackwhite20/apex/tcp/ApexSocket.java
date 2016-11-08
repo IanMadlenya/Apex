@@ -45,7 +45,7 @@ public class ApexSocket extends Apex {
     @Override
     public Channel bootstrap(EventLoopGroup bossGroup, EventLoopGroup workerGroup, String ip, int port, int backlog, int readTimeout, int writeTimeout) throws Exception {
 
-        logger.info("Bootstrapping datagram server");
+        logger.info("Bootstrapping socket server");
 
         return new ServerBootstrap()
                 .group(bossGroup, workerGroup)
