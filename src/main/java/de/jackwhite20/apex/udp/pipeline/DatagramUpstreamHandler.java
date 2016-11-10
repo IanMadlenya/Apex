@@ -65,7 +65,7 @@ public class DatagramUpstreamHandler extends SimpleChannelInboundHandler<Datagra
         }
 
         // Only copy if there is at least one backend server
-        ByteBuf copy = datagramPacket.content().copy();
+        ByteBuf copy = datagramPacket.content().copy().retain();
 
         Bootstrap bootstrap = new Bootstrap()
                 .channel(PipelineUtils.getDatagramChannel())
@@ -87,7 +87,9 @@ public class DatagramUpstreamHandler extends SimpleChannelInboundHandler<Datagra
 
                 Channel channel = channelFuture.channel();
                 if (channelFuture.isSuccess()) {
-                    channel.writeAndFlush(new DatagramPacket(copy.retain(), new InetSocketAddress(backendInfo.getHost(), backendInfo.getPort())));
+                    channel.writeAndFlush(new DatagramPacket(copy, new InetSocketAddress(backendInfo.getHost(), backendInfo.getPort())));
+                    // Release the buffer
+                    copy.release();
                 } else {
                     ChannelUtil.close(channel);
                 }

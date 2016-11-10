@@ -27,6 +27,8 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.EpollChannelOption;
+import io.netty.channel.epoll.EpollMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,11 +49,19 @@ public class ApexSocket extends Apex {
 
         logger.info("Bootstrapping socket server");
 
-        return new ServerBootstrap()
+        ServerBootstrap bootstrap = new ServerBootstrap()
                 .group(bossGroup, workerGroup)
                 .channel(PipelineUtils.getServerChannel())
                 .childHandler(new ApexSocketChannelInitializer(readTimeout, writeTimeout))
-                .childOption(ChannelOption.AUTO_READ, false)
+                .childOption(ChannelOption.AUTO_READ, false);
+
+        if (PipelineUtils.isEpoll()) {
+            bootstrap.childOption(EpollChannelOption.EPOLL_MODE, EpollMode.LEVEL_TRIGGERED);
+
+            logger.debug("Epoll mode is now level triggered");
+        }
+
+        return bootstrap
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_BACKLOG, backlog)
                 .bind(ip, port)

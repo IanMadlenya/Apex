@@ -28,6 +28,8 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.EpollChannelOption;
+import io.netty.channel.epoll.EpollMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,11 +50,19 @@ public class ApexDatagram extends Apex {
 
         logger.info("Bootstrapping datagram server");
 
-        return new Bootstrap()
+        Bootstrap bootstrap = new Bootstrap()
                 .group(workerGroup)
                 .channel(PipelineUtils.getDatagramChannel())
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                .handler(new DatagramUpstreamHandler())
+                .handler(new DatagramUpstreamHandler());
+
+        if (PipelineUtils.isEpoll()) {
+            bootstrap.option(EpollChannelOption.EPOLL_MODE, EpollMode.LEVEL_TRIGGERED);
+
+            logger.debug("Epoll mode is now level triggered");
+        }
+
+        return bootstrap
                 .bind(ip, port)
                 .sync()
                 .channel();
