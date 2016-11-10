@@ -38,7 +38,7 @@ First of all make sure you have Java 8 installed.
 Download the latest Apex version from the [release page](https://github.com/JackWhite20/Apex/releases) and start it like this:
 
 ```
-java -jar apex-1.7.1.jar
+java -jar apex-1.7.2.jar
 ```
 
 Stop it by typing ```end``` followed by an enter press. Configure the config.cope file in the same directory to fit your needs and restart Apex.
