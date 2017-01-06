@@ -39,8 +39,7 @@ public class ConnectionsPerSecondTask {
 
     public ConnectionsPerSecondTask() {
 
-        // TODO: 07.11.2016 Use shared executor service
-        scheduledExecutorService.scheduleAtFixedRate(this::check, 0, 1000, TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(this::check, 0, 1, TimeUnit.SECONDS);
     }
 
     public void stop() {

@@ -27,7 +27,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.util.internal.PlatformDependent;
 
 /**
  * Created by JackWhite20 on 23.09.2016.
@@ -43,9 +42,7 @@ public final class PipelineUtils {
     private static boolean epoll;
 
     static {
-        if (!PlatformDependent.isWindows()) {
-            epoll = Epoll.isAvailable();
-        }
+        epoll = Epoll.isAvailable();
     }
 
     private PipelineUtils() {
