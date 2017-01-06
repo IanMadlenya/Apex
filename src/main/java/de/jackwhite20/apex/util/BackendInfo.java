@@ -35,11 +35,11 @@ public class BackendInfo {
 
     public static final int DEFAULT_TCP_TIMEOUT = 4000;
 
-    public static final int DEFAULT_UDP_TIMEOUT = 1500;
+    private static final int DEFAULT_UDP_TIMEOUT = 1500;
 
-    public static final byte[] EMPTY_BUFFER = new byte[] {};
+    private static final byte[] EMPTY_BUFFER = new byte[] {};
 
-    public static final DatagramPacket EMPTY_PACKET = new DatagramPacket(EMPTY_BUFFER, EMPTY_BUFFER.length);
+    private static final DatagramPacket EMPTY_PACKET = new DatagramPacket(EMPTY_BUFFER, EMPTY_BUFFER.length);
 
     private static Logger logger = LoggerFactory.getLogger(BackendInfo.class);
 
