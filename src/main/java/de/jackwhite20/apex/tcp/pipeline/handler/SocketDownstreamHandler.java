@@ -51,16 +51,12 @@ public class SocketDownstreamHandler extends ChannelHandlerAdapter {
     public void channelRead(final ChannelHandlerContext ctx, Object msg) {
 
         if (inboundChannel.isActive()) {
-            inboundChannel.writeAndFlush(msg).addListener(new ChannelFutureListener() {
+            inboundChannel.writeAndFlush(msg).addListener((ChannelFutureListener) future -> {
 
-                @Override
-                public void operationComplete(ChannelFuture future) {
-
-                    if (future.isSuccess()) {
-                        ctx.channel().read();
-                    } else {
-                        future.channel().close();
-                    }
+                if (future.isSuccess()) {
+                    ctx.channel().read();
+                } else {
+                    future.channel().close();
                 }
             });
         }

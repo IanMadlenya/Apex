@@ -64,16 +64,12 @@ public class SocketUpstreamHandler extends ChannelHandlerAdapter {
 
         ChannelFuture f = b.connect(backendInfo.getHost(), backendInfo.getPort());
         downstreamChannel = f.channel();
-        f.addListener(new ChannelFutureListener() {
+        f.addListener((ChannelFutureListener) future -> {
 
-            @Override
-            public void operationComplete(ChannelFuture future) {
-
-                if (future.isSuccess()) {
-                    inboundChannel.read();
-                } else {
-                    inboundChannel.close();
-                }
+            if (future.isSuccess()) {
+                inboundChannel.read();
+            } else {
+                inboundChannel.close();
             }
         });
 
@@ -85,16 +81,12 @@ public class SocketUpstreamHandler extends ChannelHandlerAdapter {
     public void channelRead(final ChannelHandlerContext ctx, Object msg) {
 
         if (downstreamChannel.isActive()) {
-            downstreamChannel.writeAndFlush(msg).addListener(new ChannelFutureListener() {
+            downstreamChannel.writeAndFlush(msg).addListener((ChannelFutureListener) future -> {
 
-                @Override
-                public void operationComplete(ChannelFuture future) {
-
-                    if (future.isSuccess()) {
-                        ctx.channel().read();
-                    } else {
-                        future.channel().close();
-                    }
+                if (future.isSuccess()) {
+                    ctx.channel().read();
+                } else {
+                    future.channel().close();
                 }
             });
         }

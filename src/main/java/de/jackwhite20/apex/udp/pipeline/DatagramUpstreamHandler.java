@@ -81,18 +81,15 @@ public class DatagramUpstreamHandler extends SimpleChannelInboundHandler<Datagra
             channelFuture.channel().pipeline().addFirst(trafficShapingHandler);
         }
 
-        channelFuture.addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture channelFuture) throws Exception {
+        channelFuture.addListener((ChannelFutureListener) channelFuture1 -> {
 
-                Channel channel = channelFuture.channel();
-                if (channelFuture.isSuccess()) {
-                    channel.writeAndFlush(new DatagramPacket(copy, new InetSocketAddress(backendInfo.getHost(), backendInfo.getPort())));
-                    // Release the buffer
-                    copy.release();
-                } else {
-                    ChannelUtil.close(channel);
-                }
+            Channel channel = channelFuture1.channel();
+            if (channelFuture1.isSuccess()) {
+                channel.writeAndFlush(new DatagramPacket(copy, new InetSocketAddress(backendInfo.getHost(), backendInfo.getPort())));
+                // Release the buffer
+                copy.release();
+            } else {
+                ChannelUtil.close(channel);
             }
         });
 
