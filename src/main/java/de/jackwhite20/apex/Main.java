@@ -72,13 +72,14 @@ public class Main {
             logger.info("Config loaded");
 
             String modeString = copeConfig.getHeader("general").getKey("mode").next().asString();
-            Mode mode = Mode.valueOf(modeString.toUpperCase());
+            Mode mode = Mode.of(modeString);
             if (mode == null) {
-                logger.error("Invalid mode '{}'", modeString);
-                return;
-            }
+                logger.error("Invalid mode '{}', using 'tcp' as default mode", modeString);
 
-            logger.info("Using mode: " + mode);
+                mode = Mode.TCP;
+            } else {
+                logger.info("Using mode: " + mode);
+            }
 
             Apex apex = ApexFactory.create(mode, copeConfig);
             apex.start(mode);

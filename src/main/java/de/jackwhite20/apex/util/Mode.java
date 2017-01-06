@@ -25,5 +25,16 @@ package de.jackwhite20.apex.util;
 public enum Mode {
 
     TCP,
-    UDP
+    UDP;
+
+    public static Mode of(String modeString) {
+
+        for (Mode mode : values()) {
+            if (mode.name().toLowerCase().equals(modeString.toLowerCase())) {
+                return mode;
+            }
+        }
+
+        return null;
+    }
 }
