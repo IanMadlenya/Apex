@@ -103,7 +103,7 @@ public abstract class Apex {
         Apex.instance = this;
 
         this.copeConfig = copeConfig;
-        this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+        this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ApexThreadFactory("Check Task"));
         this.commandManager = new CommandManager();
     }
 
@@ -303,6 +303,8 @@ public abstract class Apex {
             connectionsPerSecondTask.stop();
         }
 
+        scheduledExecutorService.shutdown();
+
         // Release the traffic shaping handler
         if (trafficShapingHandler != null) {
             FileUtil.saveStats(trafficShapingHandler.trafficCounter().cumulativeReadBytes(),
@@ -322,8 +324,6 @@ public abstract class Apex {
         } catch (Exception e) {
             logger.warn("RESTful API server already stopped");
         }
-
-        scheduledExecutorService.shutdown();
 
         logger.info("Apex has been stopped");
     }
