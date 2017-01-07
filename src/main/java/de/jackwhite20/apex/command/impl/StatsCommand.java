@@ -45,7 +45,7 @@ public class StatsCommand extends Command {
         if (Apex.getInstance().getConnectionsPerSecondTask() != null) {
             logger.info("Connections per second: {}", Apex.getInstance().getConnectionsPerSecondTask().getPerSecond());
         }
-        logger.info("Online backend servers: {}", Apex.getBalancingStrategy().getBackend().size());
+        logger.info("Online backend servers: {}", Apex.getBalancingStrategy().size());
 
         GlobalTrafficShapingHandler trafficShapingHandler = Apex.getInstance().getTrafficShapingHandler();
         if (trafficShapingHandler != null) {
