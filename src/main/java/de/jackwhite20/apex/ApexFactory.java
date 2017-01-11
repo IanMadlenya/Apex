@@ -19,6 +19,7 @@
 
 package de.jackwhite20.apex;
 
+import de.jackwhite20.apex.http.ApexHttp;
 import de.jackwhite20.apex.tcp.ApexSocket;
 import de.jackwhite20.apex.udp.ApexDatagram;
 import de.jackwhite20.apex.util.Mode;
@@ -40,6 +41,8 @@ public final class ApexFactory {
                 return new ApexSocket(copeConfig);
             case UDP:
                 return new ApexDatagram(copeConfig);
+            case HTTP:
+                return new ApexHttp(copeConfig);
             default:
                 return new ApexSocket(copeConfig);
         }

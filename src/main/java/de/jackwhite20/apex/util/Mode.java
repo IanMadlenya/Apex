@@ -25,7 +25,8 @@ package de.jackwhite20.apex.util;
 public enum Mode {
 
     TCP,
-    UDP;
+    UDP,
+    HTTP;
 
     public static Mode of(String modeString) {
 

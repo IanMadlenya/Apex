@@ -222,7 +222,7 @@ public abstract class Apex {
             }
 
             if (probe != -1) {
-                backendTask = (mode == Mode.TCP) ? new CheckSocketBackendTask(balancingStrategy) :
+                backendTask = (mode == Mode.TCP || mode == Mode.HTTP) ? new CheckSocketBackendTask(balancingStrategy) :
                         new CheckDatagramBackendTask(balancingStrategy);
 
                 scheduledExecutorService.scheduleAtFixedRate(backendTask, 0, probe, TimeUnit.MILLISECONDS);
