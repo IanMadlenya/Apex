@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 "JackWhite20"
+ * Copyright (c) 2017 "JackWhite20"
  *
  * This file is part of Apex.
  *
@@ -55,7 +55,7 @@ public class DatagramUpstreamHandler extends SimpleChannelInboundHandler<Datagra
     }
 
     @Override
-    protected void messageReceived(ChannelHandlerContext ctx, DatagramPacket datagramPacket) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket datagramPacket) throws Exception {
 
         BackendInfo backendInfo = ApexDatagram.getBalancingStrategy().selectBackend("", 0);
 
@@ -86,11 +86,12 @@ public class DatagramUpstreamHandler extends SimpleChannelInboundHandler<Datagra
             Channel channel = channelFuture1.channel();
             if (channelFuture1.isSuccess()) {
                 channel.writeAndFlush(new DatagramPacket(copy, new InetSocketAddress(backendInfo.getHost(), backendInfo.getPort())));
-                // Release the buffer
-                copy.release();
             } else {
                 ChannelUtil.close(channel);
             }
+
+            // Release the buffer
+            copy.release();
         });
 
         // Keep track of request per second

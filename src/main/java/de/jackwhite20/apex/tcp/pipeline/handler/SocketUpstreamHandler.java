@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 "JackWhite20"
+ * Copyright (c) 2017 "JackWhite20"
  *
  * This file is part of Apex.
  *
@@ -35,7 +35,7 @@ import java.io.IOException;
 /**
  * Created by JackWhite20 on 26.06.2016.
  */
-public class SocketUpstreamHandler extends ChannelHandlerAdapter {
+public class SocketUpstreamHandler extends ChannelInboundHandlerAdapter {
 
     private static Logger logger = LoggerFactory.getLogger(SocketUpstreamHandler.class);
 
@@ -78,7 +78,7 @@ public class SocketUpstreamHandler extends ChannelHandlerAdapter {
     }
 
     @Override
-    public void channelRead(final ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
         if (downstreamChannel.isActive()) {
             downstreamChannel.writeAndFlush(msg).addListener((ChannelFutureListener) future -> {

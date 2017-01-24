@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 "JackWhite20"
+ * Copyright (c) 2017 "JackWhite20"
  *
  * This file is part of Apex.
  *
@@ -315,7 +315,6 @@ public abstract class Apex {
             trafficShapingHandler.release();
         }
 
-        // Shutdown the event loop groups
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
 

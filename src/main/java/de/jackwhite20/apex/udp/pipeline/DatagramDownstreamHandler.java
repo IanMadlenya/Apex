@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 "JackWhite20"
+ * Copyright (c) 2017 "JackWhite20"
  *
  * This file is part of Apex.
  *
@@ -48,7 +48,7 @@ public class DatagramDownstreamHandler extends SimpleChannelInboundHandler<Datag
     }
 
     @Override
-    protected void messageReceived(ChannelHandlerContext ctx, DatagramPacket datagramPacket) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket datagramPacket) throws Exception {
 
         if (channel.isActive()) {
             channel.writeAndFlush(new DatagramPacket(datagramPacket.content().retain(), sender));

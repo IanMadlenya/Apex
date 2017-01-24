@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 "JackWhite20"
+ * Copyright (c) 2017 "JackWhite20"
  *
  * This file is part of Apex.
  *
@@ -20,7 +20,10 @@
 package de.jackwhite20.apex.tcp.pipeline.handler;
 
 import de.jackwhite20.apex.util.ChannelUtil;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +33,7 @@ import java.io.IOException;
 /**
  * Created by JackWhite20 on 26.06.2016.
  */
-public class SocketDownstreamHandler extends ChannelHandlerAdapter {
+public class SocketDownstreamHandler extends ChannelInboundHandlerAdapter {
 
     private static Logger logger = LoggerFactory.getLogger(SocketDownstreamHandler.class);
 
@@ -48,7 +51,7 @@ public class SocketDownstreamHandler extends ChannelHandlerAdapter {
     }
 
     @Override
-    public void channelRead(final ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
         if (inboundChannel.isActive()) {
             inboundChannel.writeAndFlush(msg).addListener((ChannelFutureListener) future -> {
