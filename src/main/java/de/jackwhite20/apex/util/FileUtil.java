@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.net.URL;
 
 /**
  * Created by JackWhite20 on 01.11.2016.
@@ -68,5 +69,27 @@ public final class FileUtil {
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
+    }
+
+    public static byte[] readFile(URL url) throws IOException {
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        InputStream is = url.openStream();
+        try {
+            byte[] byteChunk = new byte[8192];
+            int n;
+
+            while ( (n = is.read(byteChunk)) > 0 ) {
+                byteArrayOutputStream.write(byteChunk, 0, n);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+        }
+
+        return byteArrayOutputStream.toByteArray();
     }
 }
