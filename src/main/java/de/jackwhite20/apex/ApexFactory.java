@@ -19,6 +19,7 @@
 
 package de.jackwhite20.apex;
 
+import de.jackwhite20.apex.socks.ApexSocks;
 import de.jackwhite20.apex.tcp.ApexSocket;
 import de.jackwhite20.apex.udp.ApexDatagram;
 import de.jackwhite20.apex.util.Mode;
@@ -40,6 +41,8 @@ public final class ApexFactory {
                 return new ApexSocket(copeConfig);
             case UDP:
                 return new ApexDatagram(copeConfig);
+            case SOCKS:
+                return new ApexSocks(copeConfig);
             default:
                 return new ApexSocket(copeConfig);
         }
