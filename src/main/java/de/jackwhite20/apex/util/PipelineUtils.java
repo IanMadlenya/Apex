@@ -28,6 +28,8 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
+import java.util.concurrent.ThreadFactory;
+
 /**
  * Created by JackWhite20 on 23.09.2016.
  */
@@ -49,9 +51,9 @@ public final class PipelineUtils {
         // No instance
     }
 
-    public static EventLoopGroup newEventLoopGroup(int threads) {
+    public static EventLoopGroup newEventLoopGroup(int threads, ThreadFactory threadFactory) {
 
-        return epoll ? new EpollEventLoopGroup(threads) : new NioEventLoopGroup(threads);
+        return epoll ? new EpollEventLoopGroup(threads, threadFactory) : new NioEventLoopGroup(threads, threadFactory);
     }
 
     public static Class<? extends ServerChannel> getServerChannel() {
