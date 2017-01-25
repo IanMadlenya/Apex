@@ -181,8 +181,8 @@ public abstract class Apex {
                     PipelineUtils.DEFAULT_WORKER_THREADS);
         }
 
-        bossGroup = PipelineUtils.newEventLoopGroup(bossThreads);
-        workerGroup = PipelineUtils.newEventLoopGroup(workerThreads);
+        bossGroup = PipelineUtils.newEventLoopGroup(bossThreads, new ApexThreadFactory("Apex Boss Thread"));
+        workerGroup = PipelineUtils.newEventLoopGroup(workerThreads, new ApexThreadFactory("Apex Worker Thread"));
 
         if (statsKey.next().asBoolean()) {
             // Only measure connections per second if stats are enabled
