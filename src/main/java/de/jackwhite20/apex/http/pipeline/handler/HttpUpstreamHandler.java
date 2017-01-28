@@ -20,13 +20,13 @@
 package de.jackwhite20.apex.http.pipeline.handler;
 
 import de.jackwhite20.apex.Apex;
-import de.jackwhite20.apex.tcp.ApexSocket;
 import de.jackwhite20.apex.util.BackendInfo;
 import de.jackwhite20.apex.util.ChannelUtil;
 import de.jackwhite20.apex.util.PipelineUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
-import io.netty.handler.codec.AsciiString;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.timeout.TimeoutException;
 import org.slf4j.Logger;
@@ -37,16 +37,9 @@ import java.io.IOException;
 /**
  * Created by JackWhite20 on 08.01.2017.
  */
-public class HttpUpstreamHandler extends ChannelHandlerAdapter {
+public class HttpUpstreamHandler extends ChannelInboundHandlerAdapter {
 
     private static Logger logger = LoggerFactory.getLogger(HttpUpstreamHandler.class);
-
-    private static final byte[] CONTENT = { 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd' };
-
-    private static final AsciiString CONTENT_TYPE = new AsciiString("Content-Type");
-    private static final AsciiString CONTENT_LENGTH = new AsciiString("Content-Length");
-    private static final AsciiString CONNECTION = new AsciiString("Connection");
-    private static final AsciiString KEEP_ALIVE = new AsciiString("keep-alive");
 
     private BackendInfo backendInfo;
 
@@ -60,69 +53,67 @@ public class HttpUpstreamHandler extends ChannelHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
 
-        final Channel inboundChannel = ctx.channel();
-
-        Bootstrap b = new Bootstrap()
-                .group(inboundChannel.eventLoop())
-                .channel(PipelineUtils.getChannel())
-                .handler(new HttpDownstreamHandler(inboundChannel))
-                .option(ChannelOption.TCP_NODELAY, true)
-                // No initial connection should take longer than 4 seconds
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, BackendInfo.DEFAULT_TCP_TIMEOUT)
-                .option(ChannelOption.AUTO_READ, false);
-
-        ChannelFuture f = b.connect(backendInfo.getHost(), backendInfo.getPort());
-        downstreamChannel = f.channel();
-        f.addListener((ChannelFutureListener) future -> {
-
-            if (future.isSuccess()) {
-                inboundChannel.read();
-            } else {
-                inboundChannel.close();
-            }
-        });
+        ctx.channel().read();
 
         // Add the channel to the channel group
-        Apex.getChannelGroup().add(inboundChannel);
+        Apex.getChannelGroup().add(ctx.channel());
     }
 
-    /*@Override
+    @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
-        System.out.println("REQUEST: " + msg.getClass().getName());
         if (msg instanceof HttpRequest) {
             HttpRequest req = (HttpRequest) msg;
 
-            boolean keepAlive = false;
-            FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(CONTENT));
-            response.headers().set(CONTENT_TYPE, "text/plain");
-            response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());
-            response.headers().set("Server", "Apex v.1.8.2");
-            response.headers().set("X-Forwarded-For", ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress().getHostAddress());
+            //System.out.println("Host: " + req.headers().get("host") + " Path: " + req.uri());
 
-            //if (!keepAlive) {
-                ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+            if (downstreamChannel == null || !downstreamChannel.isActive()) {
+                final Channel inboundChannel = ctx.channel();
 
-            System.out.println("sent");
-            //} else {
-                //response.headers().set(CONNECTION, KEEP_ALIVE);
-                //ctx.write(response);
-            //}
-        }
-    }*/
-    @Override
-    public void channelRead(final ChannelHandlerContext ctx, Object msg) {
+                Bootstrap b = new Bootstrap()
+                        .group(inboundChannel.eventLoop())
+                        .channel(PipelineUtils.getChannel())
+                        .handler(new ChannelInitializer<SocketChannel>() {
 
-        if (downstreamChannel.isActive()) {
-            if (msg instanceof HttpRequest) {
-                downstreamChannel.writeAndFlush(msg).addListener((ChannelFutureListener) future -> {
+                            @Override
+                            protected void initChannel(SocketChannel ch) throws Exception {
 
-                    System.out.println("WRITE SUCCESS: " + future.isSuccess() + " | " + downstreamChannel.isActive() + " " + downstreamChannel.isWritable());
-                    future.cause().printStackTrace();
+                                ChannelPipeline pipeline = ch.pipeline();
+                                pipeline.addLast(new HttpClientCodec());
+                                pipeline.addLast(new HttpDownstreamHandler(inboundChannel));
+                            }
+                        })
+                        .option(ChannelOption.TCP_NODELAY, true)
+                        // No initial connection should take longer than 4 seconds
+                        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, BackendInfo.DEFAULT_TCP_TIMEOUT)
+                        .option(ChannelOption.AUTO_READ, false);
+
+                String http = req.headers().get("host");
+                ChannelFuture f = b.connect((!http.contains(":")) ? http : http.split(":")[0], (!http.contains(":")) ? 80 : 443);
+                downstreamChannel = f.channel();
+                f.addListener((ChannelFutureListener) future -> {
+
+                    System.out.println(future.isSuccess());
+                    if (future.isSuccess()) {
+                        downstreamChannel.writeAndFlush(req).addListener(future1 -> {
+
+                            if (future1.isSuccess()) {
+                                inboundChannel.read();
+                            } else {
+                                ChannelUtil.closeOnFlush(inboundChannel);
+                            }
+                        });
+                    } else {
+                        ChannelUtil.close(inboundChannel);
+                    }
+                });
+            } else {
+                downstreamChannel.writeAndFlush(req).addListener(future -> {
+
                     if (future.isSuccess()) {
                         ctx.channel().read();
                     } else {
-                        future.channel().close();
+                        ChannelUtil.close(downstreamChannel);
                     }
                 });
             }
@@ -134,9 +125,9 @@ public class HttpUpstreamHandler extends ChannelHandlerAdapter {
 
         ChannelUtil.closeOnFlush(downstreamChannel);
 
-        ApexSocket.getBalancingStrategy().disconnectedFrom(backendInfo);
+        //ApexSocket.getBalancingStrategy().disconnectedFrom(backendInfo);
 
-        logger.debug("Disconnected [{}] <-> [{}:{} ({})]", ctx.channel().remoteAddress(), backendInfo.getHost(), backendInfo.getPort(), backendInfo.getName());
+        //logger.debug("Disconnected [{}] <-> [{}:{} ({})]", ctx.channel().remoteAddress(), backendInfo.getHost(), backendInfo.getPort(), backendInfo.getName());
     }
 
     @Override

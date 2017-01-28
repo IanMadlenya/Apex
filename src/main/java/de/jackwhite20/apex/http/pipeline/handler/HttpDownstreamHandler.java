@@ -21,10 +21,7 @@ package de.jackwhite20.apex.http.pipeline.handler;
 
 import de.jackwhite20.apex.tcp.pipeline.handler.SocketDownstreamHandler;
 import de.jackwhite20.apex.util.ChannelUtil;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerAdapter;
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.*;
 import io.netty.handler.timeout.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +31,7 @@ import java.io.IOException;
 /**
  * Created by JackWhite20 on 08.01.2017.
  */
-public class HttpDownstreamHandler extends ChannelHandlerAdapter {
+public class HttpDownstreamHandler extends ChannelInboundHandlerAdapter {
 
     private static Logger logger = LoggerFactory.getLogger(SocketDownstreamHandler.class);
 
@@ -43,9 +40,6 @@ public class HttpDownstreamHandler extends ChannelHandlerAdapter {
     public HttpDownstreamHandler(Channel inboundChannel) {
 
         this.inboundChannel = inboundChannel;
-
-        //inboundChannel.pipeline().addLast(new HttpRequestDecoder());
-        //inboundChannel.pipeline().addLast(new HttpResponseEncoder());
     }
 
     @Override
@@ -57,7 +51,7 @@ public class HttpDownstreamHandler extends ChannelHandlerAdapter {
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) {
 
-        System.out.println("DOWNSTREAM READ: " + msg.getClass().getName());
+        //System.out.println("DOWNSTREAM READ: " + msg.getClass().getName());
         if (inboundChannel.isActive()) {
             inboundChannel.writeAndFlush(msg).addListener((ChannelFutureListener) future -> {
 
