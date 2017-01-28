@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 "JackWhite20"
+ * Copyright (c) 2017 "JackWhite20"
  *
  * This file is part of Apex.
  *
@@ -181,8 +181,8 @@ public abstract class Apex {
                     PipelineUtils.DEFAULT_WORKER_THREADS);
         }
 
-        bossGroup = PipelineUtils.newEventLoopGroup(bossThreads);
-        workerGroup = PipelineUtils.newEventLoopGroup(workerThreads);
+        bossGroup = PipelineUtils.newEventLoopGroup(bossThreads, new ApexThreadFactory("Apex Boss Thread"));
+        workerGroup = PipelineUtils.newEventLoopGroup(workerThreads, new ApexThreadFactory("Apex Worker Thread"));
 
         if (statsKey.next().asBoolean()) {
             // Only measure connections per second if stats are enabled
@@ -315,7 +315,6 @@ public abstract class Apex {
             trafficShapingHandler.release();
         }
 
-        // Shutdown the event loop groups
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
 
