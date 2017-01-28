@@ -37,15 +37,15 @@ import java.io.IOException;
 /**
  * Created by JackWhite20 on 08.01.2017.
  */
-public class HttpUpstreamHandler extends ChannelInboundHandlerAdapter {
+public class HttpProxyUpstreamHandler extends ChannelInboundHandlerAdapter {
 
-    private static Logger logger = LoggerFactory.getLogger(HttpUpstreamHandler.class);
+    private static Logger logger = LoggerFactory.getLogger(HttpProxyUpstreamHandler.class);
 
     private BackendInfo backendInfo;
 
     private Channel downstreamChannel;
 
-    public HttpUpstreamHandler(BackendInfo backendInfo) {
+    public HttpProxyUpstreamHandler(BackendInfo backendInfo) {
 
         this.backendInfo = backendInfo;
     }
@@ -80,7 +80,7 @@ public class HttpUpstreamHandler extends ChannelInboundHandlerAdapter {
 
                                 ChannelPipeline pipeline = ch.pipeline();
                                 pipeline.addLast(new HttpClientCodec());
-                                pipeline.addLast(new HttpDownstreamHandler(inboundChannel));
+                                pipeline.addLast(new HttpProxyDownstreamHandler(inboundChannel));
                             }
                         })
                         .option(ChannelOption.TCP_NODELAY, true)

@@ -21,7 +21,7 @@ package de.jackwhite20.apex.http.pipeline.initialize;
 
 import com.google.common.base.Preconditions;
 import de.jackwhite20.apex.Apex;
-import de.jackwhite20.apex.http.pipeline.handler.HttpUpstreamHandler;
+import de.jackwhite20.apex.http.pipeline.handler.HttpProxyUpstreamHandler;
 import de.jackwhite20.apex.task.ConnectionsPerSecondTask;
 import de.jackwhite20.apex.util.BackendInfo;
 import io.netty.channel.ChannelInitializer;
@@ -36,9 +36,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by JackWhite20 on 08.01.2017.
  */
-public class ApexHttpChannelInitializer extends ChannelInitializer<SocketChannel> {
+public class ApexHttpProxyChannelInitializer extends ChannelInitializer<SocketChannel> {
 
-    private Logger logger = LoggerFactory.getLogger(ApexHttpChannelInitializer.class);
+    private Logger logger = LoggerFactory.getLogger(ApexHttpProxyChannelInitializer.class);
 
     private int readTimeout;
 
@@ -46,7 +46,7 @@ public class ApexHttpChannelInitializer extends ChannelInitializer<SocketChannel
 
     private ConnectionsPerSecondTask connectionsPerSecondTask;
 
-    public ApexHttpChannelInitializer(int readTimeout, int writeTimeout) {
+    public ApexHttpProxyChannelInitializer(int readTimeout, int writeTimeout) {
 
         Preconditions.checkState(readTimeout > 0, "readTimeout cannot be negative");
         Preconditions.checkState(writeTimeout > 0, "writeTimeout cannot be negative");
@@ -80,7 +80,7 @@ public class ApexHttpChannelInitializer extends ChannelInitializer<SocketChannel
         pipeline.addLast(new ReadTimeoutHandler(readTimeout));
         pipeline.addLast(new WriteTimeoutHandler(writeTimeout));
         pipeline.addLast(new HttpServerCodec());
-        pipeline.addLast(new HttpUpstreamHandler(backendInfo));
+        pipeline.addLast(new HttpProxyUpstreamHandler(backendInfo));
 
         connectionsPerSecondTask.inc();
     }

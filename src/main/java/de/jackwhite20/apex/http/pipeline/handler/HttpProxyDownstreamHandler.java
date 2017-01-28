@@ -31,13 +31,13 @@ import java.io.IOException;
 /**
  * Created by JackWhite20 on 08.01.2017.
  */
-public class HttpDownstreamHandler extends ChannelInboundHandlerAdapter {
+public class HttpProxyDownstreamHandler extends ChannelInboundHandlerAdapter {
 
     private static Logger logger = LoggerFactory.getLogger(SocketDownstreamHandler.class);
 
     private Channel inboundChannel;
 
-    public HttpDownstreamHandler(Channel inboundChannel) {
+    public HttpProxyDownstreamHandler(Channel inboundChannel) {
 
         this.inboundChannel = inboundChannel;
     }
@@ -51,7 +51,6 @@ public class HttpDownstreamHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) {
 
-        //System.out.println("DOWNSTREAM READ: " + msg.getClass().getName());
         if (inboundChannel.isActive()) {
             inboundChannel.writeAndFlush(msg).addListener((ChannelFutureListener) future -> {
 

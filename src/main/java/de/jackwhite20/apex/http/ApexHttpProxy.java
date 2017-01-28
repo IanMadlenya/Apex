@@ -20,7 +20,7 @@
 package de.jackwhite20.apex.http;
 
 import de.jackwhite20.apex.Apex;
-import de.jackwhite20.apex.http.pipeline.initialize.ApexHttpChannelInitializer;
+import de.jackwhite20.apex.http.pipeline.initialize.ApexHttpProxyChannelInitializer;
 import de.jackwhite20.apex.util.PipelineUtils;
 import de.jackwhite20.cope.CopeConfig;
 import io.netty.bootstrap.ServerBootstrap;
@@ -35,11 +35,11 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by JackWhite20 on 08.01.2017.
  */
-public class ApexHttp extends Apex {
+public class ApexHttpProxy extends Apex {
 
-    private static Logger logger = LoggerFactory.getLogger(ApexHttp.class);
+    private static Logger logger = LoggerFactory.getLogger(ApexHttpProxy.class);
 
-    public ApexHttp(CopeConfig copeConfig) {
+    public ApexHttpProxy(CopeConfig copeConfig) {
 
         super(copeConfig);
     }
@@ -52,7 +52,7 @@ public class ApexHttp extends Apex {
         ServerBootstrap bootstrap = new ServerBootstrap()
                 .group(bossGroup, workerGroup)
                 .channel(PipelineUtils.getServerChannel())
-                .childHandler(new ApexHttpChannelInitializer(readTimeout, writeTimeout))
+                .childHandler(new ApexHttpProxyChannelInitializer(readTimeout, writeTimeout))
                 .childOption(ChannelOption.AUTO_READ, false);
 
         if (PipelineUtils.isEpoll()) {
