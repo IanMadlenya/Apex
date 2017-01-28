@@ -41,14 +41,7 @@ public class HttpProxyUpstreamHandler extends ChannelInboundHandlerAdapter {
 
     private static Logger logger = LoggerFactory.getLogger(HttpProxyUpstreamHandler.class);
 
-    private BackendInfo backendInfo;
-
     private Channel downstreamChannel;
-
-    public HttpProxyUpstreamHandler(BackendInfo backendInfo) {
-
-        this.backendInfo = backendInfo;
-    }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -123,10 +116,6 @@ public class HttpProxyUpstreamHandler extends ChannelInboundHandlerAdapter {
     public void channelInactive(ChannelHandlerContext ctx) {
 
         ChannelUtil.closeOnFlush(downstreamChannel);
-
-        //ApexSocket.getBalancingStrategy().disconnectedFrom(backendInfo);
-
-        //logger.debug("Disconnected [{}] <-> [{}:{} ({})]", ctx.channel().remoteAddress(), backendInfo.getHost(), backendInfo.getPort(), backendInfo.getName());
     }
 
     @Override

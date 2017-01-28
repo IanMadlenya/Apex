@@ -23,7 +23,6 @@ import com.google.common.base.Preconditions;
 import de.jackwhite20.apex.Apex;
 import de.jackwhite20.apex.http.pipeline.handler.HttpProxyUpstreamHandler;
 import de.jackwhite20.apex.task.ConnectionsPerSecondTask;
-import de.jackwhite20.apex.util.BackendInfo;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -62,25 +61,12 @@ public class ApexHttpProxyChannelInitializer extends ChannelInitializer<SocketCh
     @Override
     protected void initChannel(SocketChannel channel) throws Exception {
 
-        BackendInfo backendInfo = Apex.getBalancingStrategy()
-                .selectBackend(channel.remoteAddress().getHostName(), channel.remoteAddress().getPort());
-
-        if (backendInfo == null) {
-            // Gracefully close the channel
-            channel.close();
-
-            logger.error("Unable to select a backend server. All down?");
-            return;
-        }
-
-        logger.info("New connection");
-
         ChannelPipeline pipeline = channel.pipeline();
 
         pipeline.addLast(new ReadTimeoutHandler(readTimeout));
         pipeline.addLast(new WriteTimeoutHandler(writeTimeout));
         pipeline.addLast(new HttpServerCodec());
-        pipeline.addLast(new HttpProxyUpstreamHandler(backendInfo));
+        pipeline.addLast(new HttpProxyUpstreamHandler());
 
         connectionsPerSecondTask.inc();
     }
