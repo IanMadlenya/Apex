@@ -26,7 +26,7 @@ public enum Mode {
 
     TCP,
     UDP,
-    HTTP;
+    HTTP_PROXY;
 
     public static Mode of(String modeString) {
 

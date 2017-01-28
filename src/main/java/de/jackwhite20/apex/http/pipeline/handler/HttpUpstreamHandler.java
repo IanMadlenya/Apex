@@ -93,7 +93,6 @@ public class HttpUpstreamHandler extends ChannelInboundHandlerAdapter {
                 downstreamChannel = f.channel();
                 f.addListener((ChannelFutureListener) future -> {
 
-                    System.out.println(future.isSuccess());
                     if (future.isSuccess()) {
                         downstreamChannel.writeAndFlush(req).addListener(future1 -> {
 

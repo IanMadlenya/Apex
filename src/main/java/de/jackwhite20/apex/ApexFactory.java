@@ -41,7 +41,7 @@ public final class ApexFactory {
                 return new ApexSocket(copeConfig);
             case UDP:
                 return new ApexDatagram(copeConfig);
-            case HTTP:
+            case HTTP_PROXY:
                 return new ApexHttp(copeConfig);
             default:
                 return new ApexSocket(copeConfig);
